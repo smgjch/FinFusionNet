@@ -6,12 +6,9 @@ from sklearn.preprocessing import MinMaxScaler
 from src.model.FFNet import FFN_withDilation,FFN_without_dilation,FFN_withStep
 
 input_window_size = 96
-output_window_size = 1
+output_window_size = 96
 model = FFN_without_dilation(input_window_size = input_window_size)
-# Create sliding windows
 
-
-# data = pd.read_csv('data/ETTh2_head.csv')
 data = pd.read_csv('data/ETTh2.csv')
 target_col = 'OT'
 X = data[['HUFL', 'HULL', 'MUFL', 'MULL', 'LUFL', 'LULL']].values

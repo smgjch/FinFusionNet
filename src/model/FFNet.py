@@ -22,7 +22,7 @@ class FFN_withDilation(Model):
         self.dense3 = Dense(1024 * 4, activation='relu')
         self.dense4 = Dense(64, activation='relu')
         # self.dropout3 = Dropout(0.2)
-        self.output_layer = Dense(1, activation='linear')
+        self.output_layer = Dense(96, activation='linear')
 
     def process_feature(self, input_feature):
         conv1 = self.conv1_layers(input_feature)
@@ -92,7 +92,7 @@ class FFN_without_dilation(Model):
         self.dense6 = Dense(initial_size/32, activation='relu')
         self.dense7 = Dense(initial_size//64, activation='relu')
         # self.dropout3 = Dropout(0.2)
-        self.output_layer = Dense(1, activation='linear')
+        self.output_layer = Dense(96, activation='linear')
 
     def process_feature(self, input_feature):
         conv1 = self.conv1_layers(input_feature)
@@ -160,8 +160,8 @@ class FFN_withStep(Model):
         self.dense1 = Dense(4096 * 4, activation='relu')
         self.dense2 = Dense(1024 * 4, activation='relu')
         self.dense3 = Dense(1024 * 4, activation='relu')
-        self.dense4 = Dense(64, activation='relu')
-        self.output_layer = Dense(1, activation='linear')
+        self.dense4 = Dense(256, activation='relu')
+        self.output_layer = Dense(96, activation='linear')
 
     def call(self, inputs):
         # Assuming inputs shape is (None, 32, 6)

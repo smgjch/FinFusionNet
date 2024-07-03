@@ -8,7 +8,8 @@ class FFN_withDilation(Model):
     def __init__(self, num_filters=32, kernel_size=2,input_window_size=96):
         super(FFN_withDilation, self).__init__()
         self.input_window_size = input_window_size
-        # self.kernel_size = kernel_size
+        self.kernel_size = kernel_size
+        self.num_filters = num_filters
 
         self.conv1_layers = Conv1D(num_filters, kernel_size, dilation_rate=1, activation='relu', padding='same')
         self.conv2_layers = Conv1D(num_filters, kernel_size, dilation_rate=2, activation='relu', padding='same')
@@ -74,7 +75,8 @@ class FFN_without_dilation(Model):
     def __init__(self, num_filters=64, kernel_size=2,input_window_size=96):
         super(FFN_without_dilation, self).__init__()
         self.input_window_size = input_window_size
-        # self.kernel_size = kernel_size
+        self.kernel_size = kernel_size
+        self.num_filters = num_filters
 
         self.conv1_layers = Conv1D(num_filters, kernel_size, dilation_rate=1, activation='relu', padding='same')
         # self.conv2_layers = Conv1D(num_filters, kernel_size, dilation_rate=2, activation='relu', padding='same')
@@ -145,7 +147,8 @@ class FFN_withStep(Model):
     def __init__(self, num_filters=32, kernel_size=2,input_window_size=96):
         super(FFN_withStep, self).__init__()
         self.input_window_size = input_window_size
-        # self.kernel_size = kernel_size
+        self.kernel_size = kernel_size
+        self.num_filters = num_filters
 
         self.conv1_layers = [Conv1D(num_filters, kernel_size, strides=1, activation='relu', padding='same') for _ in range(6)]
         self.conv2_layers = [Conv1D(num_filters, kernel_size, strides=2, activation='relu', padding='same') for _ in range(6)]

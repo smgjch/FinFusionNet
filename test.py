@@ -38,10 +38,10 @@ class FFN(Model):
         conv3_reshaped = Reshape((context_length, self.num_filters))(conv3)
 
         concatenated = Concatenate(axis=2)([conv1_reshaped, conv2_reshaped, conv3_reshaped])
-
+        
         return concatenated
-
-    @tf.function
+    
+    @tf.function 
     def call(self, inputs, training=False):
         # print(f"inputs {inputs.shape}")
         # Split the input into separate features
@@ -60,16 +60,17 @@ class FFN(Model):
 
         # Dense layers (MLP)
         x = self.dense1(flattened_features)
-        # x = self.dropout1(x, training=training)
+        # # x = self.dropout1(x, training=training)
         x = self.dense2(x)
-        # x = self.dropout2(x, training=training)
+        # # x = self.dropout2(x, training=training)
         x = self.dense3(x)
         x = self.dense4(x)
+        # x = self.dense4(x)
         # x = self.dropout3(x, training=training)
 
         # Output layer
         output = self.output_layer(x)
-
+        
         return output
 
 

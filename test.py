@@ -9,35 +9,38 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class FFN(Model):
-    def __init__(self, num_filters=32, kernel_size=2):
+    def __init__(self, num_filters=64, kernel_size=2):
         super(FFN, self).__init__()
         self.num_filters = num_filters
         self.kernel_size = kernel_size
 
         self.conv1_layers = Conv1D(num_filters, kernel_size, dilation_rate=1, activation='relu', padding='same')
-        self.conv2_layers = Conv1D(num_filters, kernel_size, dilation_rate=2, activation='relu', padding='same')
-        self.conv3_layers = Conv1D(num_filters, kernel_size, dilation_rate=3, activation='relu', padding='same')
-
-        self.dense1 = Dense(4096 * 4, activation='relu')
+        # self.conv2_layers = Conv1D(num_filters, kernel_size, dilation_rate=2, activation='relu', padding='same')
+        # self.conv3_layers = Conv1D(num_filters, kernel_size, dilation_rate=3, activation='relu', padding='same')
+        initial_size = 24330
+        self.dense1 = Dense(initial_size, activation='relu')
         # self.dropout1 = Dropout(0.2)
-        self.dense2 = Dense(1024 * 4, activation='relu')
+        self.dense2 = Dense(initial_size//2, activation='relu')
         # self.dropout2 = Dropout(0.2)
-        self.dense3 = Dense(1024 * 4, activation='relu')
-        self.dense4 = Dense(64, activation='relu')
+        self.dense3 = Dense(initial_size//4, activation='relu')
+        self.dense4 = Dense(initial_size//8, activation='relu')
+        self.dense5 = Dense(initial_size//16, activation='relu')
+        self.dense6 = Dense(initial_size/32, activation='relu')
+        self.dense7 = Dense(initial_size//64, activation='relu')
         # self.dropout3 = Dropout(0.2)
         self.output_layer = Dense(1, activation='linear')
 
     def process_feature(self, input_feature):
         conv1 = self.conv1_layers(input_feature)
-        conv2 = self.conv2_layers(input_feature)
-        conv3 = self.conv3_layers(input_feature)
+        # conv2 = self.conv2_layers(input_feature)
+        # conv3 = self.conv3_layers(input_feature)
 
         context_length = 96
         conv1_reshaped = Reshape((context_length, self.num_filters))(conv1)
-        conv2_reshaped = Reshape((context_length, self.num_filters))(conv2)
-        conv3_reshaped = Reshape((context_length, self.num_filters))(conv3)
+        # conv2_reshaped = Reshape((context_length, self.num_filters))(conv2)
+        # conv3_reshaped = Reshape((context_length, self.num_filters))(conv3)
 
-        concatenated = Concatenate(axis=2)([conv1_reshaped, conv2_reshaped, conv3_reshaped])
+        concatenated = Concatenate(axis=2)([conv1_reshaped])
 
         return concatenated
 
@@ -65,6 +68,9 @@ class FFN(Model):
         # x = self.dropout2(x, training=training)
         x = self.dense3(x)
         x = self.dense4(x)
+        x = self.dense5(x)
+        x = self.dense6(x)
+        x = self.dense7(x)
         # x = self.dropout3(x, training=training)
 
         # Output layer

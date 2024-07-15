@@ -23,6 +23,7 @@ if __name__ == '__main__':
                         help='task name, options:[long_term_forecast, short_term_forecast, imputation, classification, anomaly_detection]')
     parser.add_argument('--is_training', type=int, required=True, default=1, help='status')
     parser.add_argument('--model_id', type=str, required=True, default='test', help='model id')
+    parser.add_argument('--tf', type=bool, default=False, required=False, help='if it is tensorflow model or pytorch model, torch by defualt')
     parser.add_argument('--model', type=str, required=True, default='Autoformer',
                         help='model name, options: [Autoformer, Transformer, TimesNet]')
 
@@ -83,7 +84,13 @@ if __name__ == '__main__':
     parser.add_argument('--down_sampling_method', type=str, default=None,
                         help='down sampling method, only support avg, max, conv')
     parser.add_argument('--seg_len', type=int, default=48,
-                        help='the length of segmen-wise iteration of SegRNN')
+                        help='the length of segmen-wise iteration of SegRNN')    
+    parser.add_argument('--stride', type=int, default=8,
+                        help='the stride of PatchMixer')    
+    parser.add_argument('--kernel_size', type=int, default=8,
+                        help='the kernel size of PatchMixer')
+    parser.add_argument('--head_dropout', type=float, default=0.0, help='head dropout for PatchMixer')
+
 
     # optimization
     parser.add_argument('--num_workers', type=int, default=10, help='data loader num workers')
@@ -111,6 +118,8 @@ if __name__ == '__main__':
     # metrics (dtw)
     parser.add_argument('--use_dtw', type=bool, default=False, 
                         help='the controller of using dtw metric (dtw is time consuming, not suggested unless necessary)')
+    parser.add_argument('--verbose', type=int, default=0, 
+                        help='if to print shapes')
     
     # Augmentation
     parser.add_argument('--augmentation_ratio', type=int, default=0, help="How many times to augment")
@@ -151,12 +160,6 @@ if __name__ == '__main__':
         Exp = Exp_Long_Term_Forecast
     elif args.task_name == 'short_term_forecast':
         Exp = Exp_Short_Term_Forecast
-    elif args.task_name == 'imputation':
-        Exp = Exp_Imputation
-    elif args.task_name == 'anomaly_detection':
-        Exp = Exp_Anomaly_Detection
-    elif args.task_name == 'classification':
-        Exp = Exp_Classification
     else:
         Exp = Exp_Long_Term_Forecast
 

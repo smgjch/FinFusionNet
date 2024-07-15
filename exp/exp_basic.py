@@ -1,10 +1,10 @@
 import os
 import torch
-from models import Autoformer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
+from models import Autoformer, PatchMixer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
     Informer, LightTS, Reformer, ETSformer, Pyraformer, PatchTST, MICN, Crossformer, FiLM, iTransformer, \
-    Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, MambaSimple, Mamba, TemporalFusionTransformer
+    Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, TemporalFusionTransformer, miTransformer
 
-
+from models.MLPs import  Baseline, Baseline_20, Baseline_10, Baseline_15, Baseline_20_m, Baseline_25, Baseline_25_m, Baseline_25_osci, Baseline_5
 class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
@@ -25,18 +25,35 @@ class Exp_Basic(object):
             'Crossformer': Crossformer,
             'FiLM': FiLM,
             'iTransformer': iTransformer,
+            'miTransformer': miTransformer,
             'Koopa': Koopa,
             'TiDE': TiDE,
             'FreTS': FreTS,
-            'MambaSimple': MambaSimple,
-            'Mamba': Mamba,
+            # 'MambaSimple': MambaSimple,
+            # 'Mamba': Mamba,
             'TimeMixer': TimeMixer,
             'TSMixer': TSMixer,
             'SegRNN': SegRNN,
-            'TemporalFusionTransformer': TemporalFusionTransformer
+            'TemporalFusionTransformer': TemporalFusionTransformer,
+            "PatchMixer": PatchMixer,
+            # "FFN": FFN,
+            "Baseline": Baseline,
+            "Baseline_5": Baseline_5,
+            "Baseline_10": Baseline_10,
+            "Baseline_15": Baseline_15,
+            "Baseline_20": Baseline_20,
+            "Baseline_20_m": Baseline_20_m,
+            "Baseline_25": Baseline_25,
+            "Baseline_25_m": Baseline_25_m,
+            "Baseline_25_osci": Baseline_25_osci
+
         }
-        self.device = self._acquire_device()
-        self.model = self._build_model().to(self.device)
+        if not self.args.tf:
+            self.device = self._acquire_device()
+            self.model = self._build_model().to(self.device)
+        else:
+            self.device = self._acquire_device()
+            self.model = self._build_model()
 
     def _build_model(self):
         raise NotImplementedError

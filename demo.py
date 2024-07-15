@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping,TensorBoard
 from sklearn.preprocessing import MinMaxScaler
-from src.model.FFNet import FFN_withDilation,FFN_without_dilation,FFN_withStep
+from models.FFNet import FFN_withDilation,FFN_without_dilation,FFN_withStep
 
 input_window_size = 96
 output_window_size = 96

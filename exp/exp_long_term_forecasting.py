@@ -15,15 +15,45 @@ from utils.augmentation import run_augmentation,run_augmentation_single
 warnings.filterwarnings('ignore')
 
 
+
+def calculate_ic(predictions, actuals):
+    # Convert inputs to tensors if they aren't already
+    if not isinstance(predictions, torch.Tensor):
+        predictions = torch.tensor(predictions)
+    if not isinstance(actuals, torch.Tensor):
+        actuals = torch.tensor(actuals)
+
+    # Mean centering
+    pred_mean = torch.mean(predictions)
+    act_mean = torch.mean(actuals)
+    centered_predictions = predictions - pred_mean
+    centered_actuals = actuals - act_mean
+
+    # Covariance calculation
+    covariance = torch.mean(centered_predictions * centered_actuals)
+
+    # Standard deviation calculation
+    pred_std = torch.std(centered_predictions)
+    act_std = torch.std(centered_actuals)
+
+    # Information Coefficient calculation
+    ic = covariance / (pred_std * act_std)
+    print(f"pred_mean {pred_mean},act_mean {act_mean},covariance {covariance},pred_std {pred_std},act_std {act_std}")
+    # print(ic.item())
+    return ic.item()
+
+
 class Exp_Long_Term_Forecast(Exp_Basic):
     def __init__(self, args):
         super(Exp_Long_Term_Forecast, self).__init__(args)
 
     def _build_model(self):
-        model = self.model_dict[self.args.model].Model(self.args).float()
 
+        model = self.model_dict[self.args.model].Model(self.args).float()
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
+
+       
         return model
 
     def _get_data(self, flag):
@@ -40,18 +70,31 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
+        preds = torch.tensor([])
+        labels = torch.tensor([])
+
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
+                # print(f"Get from data loader, batch_x: \n{batch_x} \n\n batch_y{batch_y}")
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float()
 
                 batch_x_mark = batch_x_mark.float().to(self.device)
                 batch_y_mark = batch_y_mark.float().to(self.device)
 
+                # if batch_y[:, -self.args.pred_len:, -1:].std() == 0:
+                #     print(f"Get from data loader, batch_x: \n{batch_x} \n\n batch_y{batch_y}")
+
                 # decoder input
-                dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
-                dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                # print(f"batch x \n {batch_x.shape} \n")
+
+                # print(f"batch y \n {batch_y.shape} \n")
+                # dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
+                # dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                # # print(f"-------------dec_inp ------------\n{dec_inp.shape}")
+                dec_inp = 0
+
                 # encoder - decoder
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
@@ -64,21 +107,53 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
                     else:
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
-                f_dim = -1 if self.args.features == 'MS' else 0
-                outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                f_dim = -1 if self.args.features == 'MS' else 0 #deprecate since label located at the thrid column
+                # f_dim = -1 if self.args.features == 'MS' or self.args.features == 'M' else 0
+                if self.model.verbose:
+                    print(f"in val output shape {outputs.shape}")
+
+                outputs = outputs[:, -self.args.label_len:, 0:1]
+                batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device)
+                if self.model.verbose:
+                    print(f"in val output shape after slice {outputs.shape}")
+                    print(f"in val batch_y shape after slice {batch_y.shape}")
+
+                # print(f"------- Label sliced ------- \n{batch_x} ")
 
                 pred = outputs.detach().cpu()
                 true = batch_y.detach().cpu()
+                # print(f"-------pred-----\n{pred.shape},{pred}")
+                # print(f"-------true-----\n{true.shape}, {true}")
+
+                preds = torch.cat((preds, pred.reshape(-1)[:-1]), dim=0)
+                labels = torch.cat((labels, true.reshape(-1)[:-1]), dim=0)
+                # print(f"pre {pred.reshape(-1)[:-1]}\nlabel {true.reshape(-1)[:-1]}")
 
                 loss = criterion(pred, true)
+                # ic = calculate_ic(pred, true)
+
+                # ic = np.corrcoef(pred.reshape(-1),true.reshape(-1))
+
+                # if np.isnan(ic).any():
+                #     print(f"np ic {ic} \n\n -------pred---------\n {pred} \n\n --------------true-------------\n {true}")
+                #     calculate_ic(pred, true)
 
                 total_loss.append(loss)
+                # total_ic.append(ic[0][1])
+
+
         total_loss = np.average(total_loss)
+        ic = np.corrcoef(preds,labels)
+        MSE = criterion(preds,labels)
+        # total_ic = np.average(total_ic)
+        # print(f" {ic[0][1]} \n ---------------- IC ----------------- \n {ic} \n ------------MSE-------------\n{MSE}")
+        print(f" {ic[0][1]}")
+        
         self.model.train()
         return total_loss
 
     def train(self, setting):
+        print(f"------verbose------- \n {self.args.verbose}")
         train_data, train_loader = self._get_data(flag='train')
         vali_data, vali_loader = self._get_data(flag='val')
         test_data, test_loader = self._get_data(flag='test')
@@ -105,16 +180,23 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             self.model.train()
             epoch_time = time.time()
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
+                # print(f"get from loader {batch_y.shape} {batch_y}")
                 iter_count += 1
                 model_optim.zero_grad()
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float().to(self.device)
                 batch_x_mark = batch_x_mark.float().to(self.device)
                 batch_y_mark = batch_y_mark.float().to(self.device)
+                # print(f"before dec input checkpoint! shapes:  x shape: {batch_x.shape} y shape {batch_y.shape} \n")
+                # print(f"before decinput checkpoint! shapes:  x shape: {batch_x.shape} y shape {batch_y.shape} \n x: {batch_x}, \n y: \n {batch_y}")
 
                 # decoder input
-                dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
-                dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                # print(f"batch y \n {batch_y.shape} \n content: \n{batch_y}")
+
+                # dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
+                # dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                # # print(f"checkpoint! shapes:  x shape: {batch_x.shape} y shape {dec_inp.shape} \n x: {batch_x}, \n y: \n {dec_inp}")
+                # print(f"checkpoint! shapes:  x shape: {batch_x.shape} y shape {dec_inp.shape} ")
 
                 # encoder - decoder
                 if self.args.use_amp:
@@ -124,20 +206,36 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
-                        f_dim = -1 if self.args.features == 'MS' else 0
-                        outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                        batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                        # f_dim = -1 if self.args.features == 'MS' else 0
+                        outputs = outputs[:, -self.args.label_len:, 0:1]
+                        batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device)  # only for btc dataset since target is at first column
                         loss = criterion(outputs, batch_y)
                         train_loss.append(loss.item())
                 else:
+                    # print("in else")
                     if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                        outputs = self.model(batch_x, batch_x_mark, 0, 0)[0]
                     else:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                        outputs = self.model(batch_x, batch_x_mark, 0, 0)
+                    
+                    if self.model.verbose:
+                        print(f"in train, ouput shape before slice {outputs.shape}")
+                    
+                    f_dim = -1 if self.args.features == 'MS' else 0 # deprecate on btc dataset
 
-                    f_dim = -1 if self.args.features == 'MS' else 0
-                    outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                    batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                    outputs = outputs[:, -self.args.label_len:, 0:1]
+                    
+
+                    if self.model.verbose:    
+                        print(f"in train, ouput after slice {outputs.shape}")
+
+                    batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device) # batch_y slice label only
+                    # print(f"in train, ouput after slice {batch_y.shape} \n {batch_y}")
+                    
+                    
+                    if self.model.verbose:
+                        print(f"in train, batch_y shape after slice {batch_y.shape}")
+                    
                     loss = criterion(outputs, batch_y)
                     train_loss.append(loss.item())
 
@@ -159,7 +257,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
+            print("val ic: ",end = "")
             vali_loss = self.vali(vali_data, vali_loader, criterion)
+            print("test ic: ",end = "")
             test_loss = self.vali(test_data, test_loader, criterion)
 
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
@@ -198,9 +298,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 batch_y_mark = batch_y_mark.float().to(self.device)
 
                 # decoder input
-                dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
-                dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
-                # encoder - decoder
+                # dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
+                # dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
+                # # encoder - decoder
+                dec_inp = 0
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
@@ -215,8 +316,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
-                outputs = outputs[:, -self.args.pred_len:, :]
-                batch_y = batch_y[:, -self.args.pred_len:, :].to(self.device)
+
+                outputs = outputs[:, -self.args.label_len:, :]
+                batch_y = batch_y[:, -self.args.label_len:, :].to(self.device)
                 outputs = outputs.detach().cpu().numpy()
                 batch_y = batch_y.detach().cpu().numpy()
                 if test_data.scale and self.args.inverse:
@@ -224,8 +326,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     outputs = test_data.inverse_transform(outputs.squeeze(0)).reshape(shape)
                     batch_y = test_data.inverse_transform(batch_y.squeeze(0)).reshape(shape)
         
-                outputs = outputs[:, :, f_dim:]
-                batch_y = batch_y[:, :, f_dim:]
+                outputs = outputs[:, :, 0:1]
+                batch_y = batch_y[:, :, 0:1]
 
                 pred = outputs
                 true = batch_y
@@ -283,3 +385,4 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         np.save(folder_path + 'true.npy', trues)
 
         return
+

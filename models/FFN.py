@@ -16,26 +16,39 @@ class Model(nn.Module):
         self.conv1_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
                                       kernel_size = self.kernel_size, dilation=1,padding =0)
         
-        self.dense1 = nn.Linear(635680 , 4096 * 4)
+        self.dense1 = nn.Linear(65760 , 4096 * 4)
         self.dense2 = nn.Linear(4096 * 4, 1024 * 4)
         self.dense3 = nn.Linear(1024 * 4, 1024 * 4)
         self.dense4 = nn.Linear(1024 * 4, 64)
         self.output_layer = nn.Linear(64, self.label_len)
-        self.output_layerf = nn.Linear(16, 1)
+        # self.output_layerf = nn.Linear(16, 1)
 
     def process_feature(self, input_feature):
         to_concate = []
         for table in range(self.batch_size):
-            for i in range(self.enc_in-1):
-                feature = input_feature[table:table+1, :, i:i+1]
-                feature = feature.permute(0,2,1)
+            page = []
+            for i in range(self.input_window_size):
+                # print(f"now at {i}")
+                feature = input_feature[table:table+1, i:i+1, :]
+                
+                # feature = feature.permute(0,2,1)
                 # print(f"sliced shape {feature.shape}")
                 conved = F.relu(self.conv1_layers(feature))
-                # conved = conved.squeeze(1)
-                to_concate.append(conved)
+                # print(f"conved shape {conved.shape}")
+                
+                conved = conved.flatten()
+                # print(f"flatten shape {conved.shape}")
+
+                page.append(conved)
+            
+            concatenated_page = torch.cat(page,dim=0)
+            concatenated_page = torch.unsqueeze(concatenated_page,0)
+            # print(f"page to concate {concatenated_page.shape}")
+            
+            to_concate.append(concatenated_page)
 
         # print(f"shapes {conv1.shape} {conv2.shape} {conv3.shape}")
-        concatenated = torch.cat(to_concate, dim=2)
+        concatenated = torch.cat(to_concate, dim=0)
 
         return concatenated
 
@@ -43,24 +56,28 @@ class Model(nn.Module):
 
 
     def forward(self, inputs,_x,y,_y):
-        print(f"shape of x {inputs.shape}")
+        # print(f"shape of x {inputs.shape}")
         concatenated = self.process_feature(inputs)
-        print(f"shape of x convoluted {inputs.shape}")
-
-        concatenated = concatenated.reshape(self.batch_size,-1)
-        print(f"reshaped x {inputs.shape}")
+        # print(f"shape of x convoluted {concatenated.shape}")
+        # flattened_size = concatenated.shape[1]
+        # print(f"flattened x {flattened_size.shape}")
+        
+        # concatenated = concatenated.reshape(self.batch_size,flattened_size)
+        # print(f"reshaped x {concatenated.shape}")
 
         x = F.relu(self.dense1(concatenated))
         x = F.relu(self.dense2(x))
         x = F.relu(self.dense3(x))
         x = F.relu(self.dense4(x))
-
+        # print(f"x to output {x.shape}")
+        
         # Output layer
         output = self.output_layer(x)
-        output = output.permute(0,2,1)
+        # output = output.permute(0,2,1)
         # print(f"output {output.shape}")
-        output = self.output_layerf(output)
+        # output = self.output_layerf(output)
         # print(f"outputf {output.shape}")
+        output = torch.unsqueeze(output,1)
         
         return output
 

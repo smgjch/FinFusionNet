@@ -22,7 +22,8 @@ python -u run.py \
   --dropout 0.5 \
   --learning_rate 0.0001 \
   --des 'Exp' \
-  --itr 2 \
+  --itr 1 \
   --num_workers 0 \
   --batch_size 1024 \
-  --patience 5
+  --patience 10 \
+  --train_epochs 1000

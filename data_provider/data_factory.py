@@ -71,13 +71,14 @@ def data_provider(args, flag):
             freq=freq,
             seasonal_patterns=args.seasonal_patterns
         )
-        # print(flag, len(data_set))
+        # print(batch_size)
         data_loader = DataLoader(
             data_set,
             batch_size=batch_size,
             shuffle=shuffle_flag,
             num_workers=args.num_workers,
             drop_last=drop_last)
+
         return data_set, data_loader
 
 

@@ -11,6 +11,9 @@ import warnings
 import numpy as np
 from utils.dtw_metric import dtw,accelerated_dtw
 from utils.augmentation import run_augmentation,run_augmentation_single
+from torch.utils.tensorboard import SummaryWriter
+
+from datetime import datetime
 
 warnings.filterwarnings('ignore')
 
@@ -46,6 +49,11 @@ def calculate_ic(predictions, actuals):
 class Exp_Long_Term_Forecast(Exp_Basic):
     def __init__(self, args):
         super(Exp_Long_Term_Forecast, self).__init__(args)
+        now = datetime.now()
+        
+        time_string = now.strftime("%Y-%m-%d %H:%M:%S")
+        self.writer = SummaryWriter(log_dir=f'train_log/{args.model_id}{time_string}')
+
 
     def _build_model(self):
 
@@ -53,15 +61,21 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
 
-       
+
         return model
 
     def _get_data(self, flag):
         data_set, data_loader = data_provider(self.args, flag)
+
+        data_iter = iter(data_loader)
+        batch = next(data_iter)
+        
+        # self.writer.add_graph(self.model, (batch[0].float(),torch.tensor([]),torch.tensor([]),torch.tensor([])))
+        
         return data_set, data_loader
 
     def _select_optimizer(self):
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
+        model_optim = optim.Rprop(self.model.parameters(), lr=self.args.learning_rate)
         return model_optim
 
     def _select_criterion(self):
@@ -142,6 +156,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 # total_ic.append(ic[0][1])
 
 
+        print(f"what fuck {preds}")
         total_loss = np.average(total_loss)
         ic = np.corrcoef(preds,labels)
         MSE = criterion(preds,labels)
@@ -150,7 +165,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         print(f" {ic[0][1]}")
         
         self.model.train()
-        return total_loss
+        return total_loss, ic[0][1]
 
     def train(self, setting):
         print(f"------verbose------- \n {self.args.verbose}")
@@ -166,7 +181,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         train_steps = len(train_loader)
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
-
+        global_step = 0
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
 
@@ -176,11 +191,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
-
+            global_step += 1
             self.model.train()
             epoch_time = time.time()
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
-                # print(f"get from loader {batch_y.shape} {batch_y}")
+                print(f"get from loader {batch_x.shape}")
                 iter_count += 1
                 model_optim.zero_grad()
                 batch_x = batch_x.float().to(self.device)
@@ -202,7 +217,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0] # not entered does not matter
                         else:
                             outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
 
@@ -258,12 +273,18 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
             print("val ic: ",end = "")
-            vali_loss = self.vali(vali_data, vali_loader, criterion)
+            vali_loss, vic = self.vali(vali_data, vali_loader, criterion)
             print("test ic: ",end = "")
-            test_loss = self.vali(test_data, test_loader, criterion)
+            test_loss, tic = self.vali(test_data, test_loader, criterion)
+
+            self.writer.add_scalar('train_loss', train_loss, epoch)
+            self.writer.add_scalar('test ic', tic, epoch)
+            self.writer.add_scalar('val ic', vic, epoch)
+
 
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss, test_loss))
+            
             early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
                 print("Early stopping")
@@ -273,6 +294,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         best_model_path = path + '/' + 'checkpoint.pth'
         self.model.load_state_dict(torch.load(best_model_path))
+        for name, param in self.model.named_parameters():
+            self.writer.add_histogram(name + '_grad', param.grad, global_step=global_step)
+
+        self.writer.close()
+        
 
         return self.model
 

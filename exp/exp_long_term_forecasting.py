@@ -1,5 +1,6 @@
 from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
+from utils import tensorboard_helper
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
 import torch
@@ -52,7 +53,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         now = datetime.now()
         
         time_string = now.strftime("%Y-%m-%d %H:%M:%S")
-        self.writer = SummaryWriter(log_dir=f'train_log/{args.model_id}{time_string}')
+        writer = SummaryWriter(log_dir=f'train_log/{args.model_id}{time_string}')
+        self.loger = tensorboard_helper.Loger(writer = writer, global_step = 0)
+
 
 
     def _build_model(self):
@@ -66,12 +69,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
     def _get_data(self, flag):
         data_set, data_loader = data_provider(self.args, flag)
-
-        data_iter = iter(data_loader)
-        batch = next(data_iter)
-        
-        # self.writer.add_graph(self.model, (batch[0].float(),torch.tensor([]),torch.tensor([]),torch.tensor([])))
-        
         return data_set, data_loader
 
     def _select_optimizer(self):
@@ -113,14 +110,14 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
                         else:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)
                 else:
                     if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
                     else:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)
                 f_dim = -1 if self.args.features == 'MS' else 0 #deprecate since label located at the thrid column
                 # f_dim = -1 if self.args.features == 'MS' or self.args.features == 'M' else 0
                 if self.model.verbose:
@@ -156,18 +153,31 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 # total_ic.append(ic[0][1])
 
 
-        print(f"what fuck {preds}")
         total_loss = np.average(total_loss)
         ic = np.corrcoef(preds,labels)
         MSE = criterion(preds,labels)
         # total_ic = np.average(total_ic)
         # print(f" {ic[0][1]} \n ---------------- IC ----------------- \n {ic} \n ------------MSE-------------\n{MSE}")
-        print(f" {ic[0][1]}")
+        print(f" {ic[0][1]}\n")
+        print(f"-----------prediction------- \n{preds}\n")
+        print(f"-----------Lables------- \n{labels}\n")
         
         self.model.train()
         return total_loss, ic[0][1]
+    
 
+    
     def train(self, setting):
+
+        if self.args.write_graph:
+            sample_x, _x, y, _y= tensorboard_helper.get_sample_input(self.args,self.device)
+            self.loger.writer.add_graph(self.model, (sample_x, _x, y, _y))
+        
+        if self.args.log_gradient:
+            self.loger.log_gradients(self.model)
+
+
+
         print(f"------verbose------- \n {self.args.verbose}")
         train_data, train_loader = self._get_data(flag='train')
         vali_data, vali_loader = self._get_data(flag='val')
@@ -181,7 +191,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         train_steps = len(train_loader)
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
-        global_step = 0
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
 
@@ -191,11 +200,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
-            global_step += 1
             self.model.train()
             epoch_time = time.time()
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
                 # print(f"get from loader {batch_x.shape}")
+                self.loger.global_step += 1
+                
                 iter_count += 1
                 model_optim.zero_grad()
                 batch_x = batch_x.float().to(self.device)
@@ -217,9 +227,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0] # not entered does not matter
+                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0] # not entered does not matter
                         else:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)
 
                         # f_dim = -1 if self.args.features == 'MS' else 0
                         outputs = outputs[:, -self.args.label_len:, 0:1]
@@ -229,9 +239,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 else:
                     # print("in else")
                     if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, 0, 0)[0]
+                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
                     else:
-                        outputs = self.model(batch_x, batch_x_mark, 0, 0)
+                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)
                     
                     if self.model.verbose:
                         print(f"in train, ouput shape before slice {outputs.shape}")
@@ -272,14 +282,14 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
-            print("val ic: ",end = "")
+            print("\nval ic: ",end = "")
             vali_loss, vic = self.vali(vali_data, vali_loader, criterion)
-            print("test ic: ",end = "")
+            print("\ntest ic: ",end = "")
             test_loss, tic = self.vali(test_data, test_loader, criterion)
 
-            self.writer.add_scalar('train_loss', train_loss, epoch)
-            self.writer.add_scalar('test ic', tic, epoch)
-            self.writer.add_scalar('val ic', vic, epoch)
+            self.loger.writer.add_scalar('train_loss', train_loss, epoch)
+            self.loger.writer.add_scalar('test ic', tic, epoch)
+            self.loger.writer.add_scalar('val ic', vic, epoch)
 
 
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
@@ -294,10 +304,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         best_model_path = path + '/' + 'checkpoint.pth'
         self.model.load_state_dict(torch.load(best_model_path))
-        for name, param in self.model.named_parameters():
-            self.writer.add_histogram(name + '_grad', param.grad, global_step=global_step)
+        # if not self.args.gradient_checkpoint:
+        #     for name, param in self.model.named_parameters():
+        #         self.loger.writer.add_histogram(name + '_grad', param.grad, global_step=self.loger.global_step)
 
-        self.writer.close()
+        self.loger.writer.close()
         
 
         return self.model
@@ -331,15 +342,15 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
                         else:
-                            outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)
                 else:
                     if self.args.output_attention:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)[0]
+                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
 
                     else:
-                        outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
 
@@ -347,16 +358,23 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 batch_y = batch_y[:, -self.args.label_len:, :].to(self.device)
                 outputs = outputs.detach().cpu().numpy()
                 batch_y = batch_y.detach().cpu().numpy()
+
+
                 if test_data.scale and self.args.inverse:
                     shape = outputs.shape
                     outputs = test_data.inverse_transform(outputs.squeeze(0)).reshape(shape)
                     batch_y = test_data.inverse_transform(batch_y.squeeze(0)).reshape(shape)
         
+                # print(f"shapes beforo outputs {outputs.shape}, batch_y {batch_y.shape}")
+
                 outputs = outputs[:, :, 0:1]
                 batch_y = batch_y[:, :, 0:1]
 
+                
                 pred = outputs
                 true = batch_y
+                
+                # print(f"shapes beforo visual pred {pred.shape}, true {true.shape}")
 
                 preds.append(pred)
                 trues.append(true)
@@ -365,16 +383,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     if test_data.scale and self.args.inverse:
                         shape = input.shape
                         input = test_data.inverse_transform(input.squeeze(0)).reshape(shape)
+                    # print(f"when testing input {input.shape}, pred {pred.shape}")
                     gt = np.concatenate((input[0, :, -1], true[0, :, -1]), axis=0)
                     pd = np.concatenate((input[0, :, -1], pred[0, :, -1]), axis=0)
                     visual(gt, pd, os.path.join(folder_path, str(i) + '.pdf'))
 
         preds = np.array(preds)
         trues = np.array(trues)
-        print('test shape:', preds.shape, trues.shape)
+        # print('test shape:', preds.shape, trues.shape)
         preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
         trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
-        print('test shape:', preds.shape, trues.shape)
+        # print('test shape:', preds.shape, trues.shape)
 
         # result save
         folder_path = './results/' + setting + '/'

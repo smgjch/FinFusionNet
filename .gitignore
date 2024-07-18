@@ -1,1 +1,7 @@
 dataset/
+__pycache__/
+results/
+logs/
+checkpoints/
+train_log/
+test_results/

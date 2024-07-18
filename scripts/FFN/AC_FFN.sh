@@ -1,6 +1,6 @@
 export CUDA_VISIBLE_DEVICES=0
 
-model_name=FFN
+model_name=AC_FFN
 
 seq_len=30
 
@@ -17,7 +17,7 @@ python -u run.py \
   --pred_len 0 \
   --label_len 1 \
   --kernel_size 2\
-  --num_kernels 10 \
+  --num_kernels 8 \
   --enc_in 138 \
   --des 'Exp' \
   --itr 1 \
@@ -25,4 +25,8 @@ python -u run.py \
   --batch_size 128 \
   --patience 10 \
   --is_training 1 \
+  --log_gradient \
   --train_epochs 1000
+# --write_graph
+# --log_gradient
+# --gradient_checkpoint

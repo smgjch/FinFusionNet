@@ -1,6 +1,6 @@
 export CUDA_VISIBLE_DEVICES=0
 
-model_name=FFN
+model_name=DFFN
 
 seq_len=30
 
@@ -25,4 +25,5 @@ python -u run.py \
   --batch_size 128 \
   --patience 10 \
   --is_training 1 \
+  --gradient_checkpoint\
   --train_epochs 1000

@@ -2,7 +2,8 @@ import os
 import torch
 from models import Autoformer, PatchMixer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
     Informer, LightTS, Reformer, ETSformer, Pyraformer, PatchTST, MICN, Crossformer, FiLM, iTransformer, \
-    Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, TemporalFusionTransformer, miTransformer, FFN
+    Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, TemporalFusionTransformer, miTransformer
+from models.FFNs import FFN, AC_FFN, DFFN, FAC_DFFN, SAC_DFFN
 
 from models.MLPs import  Baseline, Baseline_20, Baseline_10, Baseline_15, Baseline_20_m, Baseline_25, Baseline_25_m, Baseline_25_osci, Baseline_5
 class Exp_Basic(object):
@@ -37,6 +38,10 @@ class Exp_Basic(object):
             'TemporalFusionTransformer': TemporalFusionTransformer,
             "PatchMixer": PatchMixer,
             "FFN": FFN,
+            "AC_FFN": AC_FFN,
+            "DFFN": DFFN,
+            "SAC_DFFN": SAC_DFFN,
+            "FAC_DFFN": FAC_DFFN,
             "Baseline": Baseline,
             "Baseline_5": Baseline_5,
             "Baseline_10": Baseline_10,

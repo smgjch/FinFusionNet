@@ -151,3 +151,21 @@ mse:0.9305988550186157, mae:0.5859373211860657, dtw:-999
 long_term_forecast_BTC_1__Baseline_5_mbtc_ftMS_sl1_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0  
 mse:0.9324935674667358, mae:0.5861641764640808, dtw:-999
 
+long_term_forecast_BTC_30__FFN_mbtc_ftMS_sl30_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0  
+mse:0.9273868203163147, mae:0.5849010944366455, dtw:-999
+
+long_term_forecast_BTC_30__FFN_mbtc_ftMS_sl30_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0  
+mse:0.9353258609771729, mae:0.5904407501220703, dtw:-999
+
+long_term_forecast_BTC_30__FFN_mbtc_ftMS_sl30_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0  
+mse:0.9316946864128113, mae:0.5878034234046936, dtw:-999
+
+long_term_forecast_BTC_96__AC_FFN_mbtc_ftMS_sl96_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0  
+mse:0.9335245490074158, mae:0.588772177696228, dtw:-999
+
+long_term_forecast_BTC_30__AC_FFN_mbtc_ftMS_sl30_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0  
+mse:0.9274646043777466, mae:0.5850639343261719, dtw:-999
+
+long_term_forecast_BTC_30__AC_FFN_mbtc_ftMS_sl30_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0  
+mse:0.9320980906486511, mae:0.588408350944519, dtw:-999
+

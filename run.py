@@ -26,6 +26,12 @@ if __name__ == '__main__':
     parser.add_argument('--tf', type=bool, default=False, required=False, help='if it is tensorflow model or pytorch model, torch by defualt')
     parser.add_argument('--model', type=str, required=True, default='Autoformer',
                         help='model name, options: [Autoformer, Transformer, TimesNet]')
+    
+    # log config
+    parser.add_argument('--write_graph', default=False, action='store_true',  help='write model graph to tensorboard')
+    parser.add_argument('--log_gradient', default=False, action='store_true',  help='log gradient to tensorboard')
+    parser.add_argument('--gradient_checkpoint',default=False, action='store_true', help='use gradient_checkpoint training')
+
 
     # data loader
     parser.add_argument('--data', type=str, required=True, default='ETTm1', help='dataset type')

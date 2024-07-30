@@ -19,22 +19,12 @@ class Model(nn.Module):
         self.enc_in = configs.enc_in
         self.dropout_rate = configs.dropout
 
-        self.conv1_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
-                                      kernel_size = self.kernel_size, dilation=1,padding =0)
-        
-        self.conv1_1_layers = nn.Conv1d(in_channels = 1, out_channels = 1, 
-                                      kernel_size = self.kernel_size, dilation=1,padding =0,stride=2)
-        
-        self.conv2_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
-                                      kernel_size = self.kernel_size, dilation=2,padding =0)
-        self.conv2_1_layers = nn.Conv1d(in_channels = 1, out_channels = 1, 
-                                      kernel_size = self.kernel_size, dilation=1,padding =0,stride=2)
-        
-        self.conv3_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
-                                      kernel_size = self.kernel_size, dilation=3,padding =0)
-        self.conv3_1_layers = nn.Conv1d(in_channels = 1, out_channels = 1, 
-                                      kernel_size = self.kernel_size, dilation=1,padding =0,stride=2)
-        
+        self.conv1_layers = nn.Conv2d(in_channels=1, out_channels= self.num_filters, kernel_size=3, stride=1)
+        self.conv2_layers = nn.Conv2d(in_channels=16, out_channels= self.num_filters, kernel_size=2, stride=1)
+        self.conv3_layers = nn.Conv2d(in_channels=32, out_channels= self.num_filters, kernel_size=1, stride=1)
+
+     
+        self.pool1d = nn.MaxPool1d(kernel_size=2)
 
 
 
@@ -58,19 +48,19 @@ class Model(nn.Module):
         convoluted_d1 = self.conv1_layers(flattened_input).view(self.batch_size,1,-1)
         # print(f"shape of convoluted1 before stride x {convoluted_d1.shape}")
 
-        convoluted_d1 = self.conv1_1_layers(convoluted_d1)
+        convoluted_d1 = self.pool1d(convoluted_d1)
         # print(f"shape of convoluted1 x {convoluted_d1.shape}")
 
         convoluted_d2 = self.conv2_layers(flattened_input).view(self.batch_size,1,-1)
         # print(f"shape of convoluted2 before stride x {convoluted_d2.shape}")
 
-        convoluted_d2 = self.conv2_1_layers(convoluted_d2)
+        convoluted_d2 = self.pool1d(convoluted_d2)
         # print(f"shape of convoluted2 x {convoluted_d2.shape}")
 
         convoluted_d3 = self.conv3_layers(flattened_input).view(self.batch_size,1,-1)
         # print(f"shape of convoluted3 before stride x {convoluted_d3.shape}")
 
-        convoluted_d3 = self.conv3_1_layers(convoluted_d3)
+        convoluted_d3 = self.pool1d(convoluted_d3)
         # print(f"shape of convoluted3 x {convoluted_d3.shape}")
         
         convoluted = torch.cat([convoluted_d1,convoluted_d2,convoluted_d3],dim=2)

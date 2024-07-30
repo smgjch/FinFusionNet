@@ -36,23 +36,26 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
 
         self.model.eval()
         with torch.no_grad():
-            for i, batch_x in enumerate(vali_loader):
+            for i, (batch_x,batch_y) in enumerate(vali_loader):
                 # print(f"Get from data loader, batch_x: \n{batch_x} \n\n batch_y{batch_y}")
-                edge_index, edge_attr = self.get_edges_when_training(batch_x)
 
                 batch_x = batch_x.float().to(self.device)
+                batch_y = batch_y.float().to(self.device)
+
+                edge_index, edge_attr = self.get_edges_when_training(batch_x,training=False)
+                edge_index, edge_attr = edge_index.to(self.device), edge_attr.to(self.device)
 
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs =  self.model(batch_x,edge)[0]
+                            outputs =  self.model(batch_x, edge_index, edge_attr)[0]
                         else:
-                            outputs =  self.model(batch_x, edge)
+                            outputs =  self.model(batch_x,  edge_index, edge_attr)
                 else:
                     if self.args.output_attention:
-                        outputs =  self.model(batch_x,edge)[0]
+                        outputs =  self.model(batch_x, edge_index, edge_attr)[0]
                     else:
-                        outputs =  self.model(batch_x, edge)
+                        outputs =  self.model(batch_x,  edge_index, edge_attr)
                 f_dim = -1 if self.args.features == 'MS' else 0 #deprecate since label located at the thrid column
                 # f_dim = -1 if self.args.features == 'MS' or self.args.features == 'M' else 0
                 if self.model.verbose:
@@ -124,7 +127,7 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
         return edge_index, edge_attr
 
     
-    def get_edges_when_training(self,batch):
+    def get_edges_when_training(self,batch,training = True):
         if self.args.GNN_type ==0:
             return self.edge_index, self.edge_attr
         elif self.args.GNN_type == 1:
@@ -132,9 +135,10 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
             return edge_index, edge_attr
         elif self.args.GNN_type == 2:
             edge_index, edge_attr = mDataset_btc_CGNN.create_graph(batch)
-            edge_index, edge_attr = Exp_Long_Term_Forecast_CGNN.selective_merge_graphs(self.edge_index, self.edge_attr, edge_index, edge_attr)
-            return edge_index, edge_attr
-
+            if training:
+                self.edge_index, self.edge_attr = Exp_Long_Term_Forecast_CGNN.selective_merge_graphs(self.edge_index, self.edge_attr, edge_index, edge_attr)
+            return self.edge_index, self.edge_attr
+        
     def train(self, setting):
 
         if self.args.write_graph:
@@ -174,7 +178,7 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
             train_loss = []
             self.model.train()
             epoch_time = time.time()
-            for i, batch_x in enumerate(train_loader):
+            for i, (batch_x,batch_y) in enumerate(train_loader):
 
                 # print(f"get from loader {batch_x.shape}")
                 self.loger.global_step += 1
@@ -182,9 +186,10 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
                 iter_count += 1
                 model_optim.zero_grad()
                 batch_x = batch_x.float().to(self.device)
+                batch_y = batch_y.float().to(self.device)
 
                 edge_index, edge_attr = self.get_edges_when_training(batch_x)
-
+                edge_index, edge_attr = edge_index.to(self.device), edge_attr.to(self.device)
 
                 # encoder - decoder
                 if self.args.use_amp:
@@ -289,12 +294,13 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
 
         self.model.eval()
         with torch.no_grad():
-            for i, batch_x in enumerate(test_loader):
+            for i, (batch_x,batch_y) in enumerate(test_loader):
                 
-                edge_index, edge_attr = self.get_edges_when_training(batch_x)
+                edge_index, edge_attr = self.get_edges_when_training(batch_x,training=False)
 
                 batch_x = batch_x.float().to(self.device)
-                
+                batch_y = batch_y.float().to(self.device)
+                edge_index, edge_attr = edge_index.to(self.device), edge_attr.to(self.device)
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:

@@ -596,7 +596,7 @@ class mDataset_btc_CGNN(Dataset):
         self.__read_data__()
         if self.args.GNN_type != 1 and flag=='train': # static and hybird all require a global graph
             # print(f"shape of data_x {self.data_x.shape}")
-            self.edge_attr, self.edge_index = mDataset_btc_CGNN.create_graph(self.data_x)
+            self.edge_index, self.edge_attr = mDataset_btc_CGNN.create_graph(self.data_x)
 
     def __read_data__(self):
         self.scaler = StandardScaler()
@@ -661,26 +661,22 @@ class mDataset_btc_CGNN(Dataset):
             batch_size, num_features, num_nodes= input.shape
 
         flattened_data = input.reshape(-1,num_nodes)
-        print(f"shape of graph input {flattened_data.shape}")
+        # print(f"shape of graph input {flattened_data.shape}")
+
         corr_matrix = np.corrcoef(flattened_data.T)
-        # print(f"corr_matrix {corr_matrix}")
         edge_index = []
         edge_attr = []
         for i in range(num_nodes):
-            for j in range(i+1, num_nodes):
-                if abs(corr_matrix[i, j]) > threshold:
-                    # print(f"pair {i,j}, ic {corr_matrix[i, j]}")
-                    edge_index.extend([[i, j], [j, i]])
-                    edge_attr.extend([corr_matrix[i, j], corr_matrix[i, j]])
-        # print(f"edge shape {edge_index.shape} \n edge attr {edge_attr.shape}")
+            for j in range(num_nodes):
+                if i != j and abs(corr_matrix[i, j]) > threshold:
+                    edge_index.append([i, j])
+                    edge_attr.append(corr_matrix[i, j])
         
-        edge_index = torch.tensor(edge_index, dtype=torch.long).t().contiguous()
-        edge_attr = torch.tensor(edge_attr, dtype=torch.float)
-        print(edge_index)
-        # print(f"edge shape after torching {edge_index.shape} \n edge attr {edge_attr.shape}")
-        
+        edge_index = torch.tensor(edge_index, dtype=torch.long).t()
+        edge_attr = torch.tensor(edge_attr, dtype=torch.float)  # Reshape to (num_edges, 1)
+        # print(f"edge shape from graph {edge_index.shape} \n {edge_index}\n-----\nedge attr {edge_attr.shape} \n {edge_attr}")
         return edge_index, edge_attr
-
+    
     def __getitem__(self, index):
         s_begin = index
         s_end = s_begin + self.seq_len
@@ -689,12 +685,12 @@ class mDataset_btc_CGNN(Dataset):
         r_end = r_begin + self.label_len + self.pred_len
 
         seq_x = self.data_x[s_begin:s_end]
-        # seq_y = self.data_y[r_begin:r_end]
+        seq_y = self.data_y[r_begin:r_end]
         # seq_x_mark = self.data_stamp[s_begin:s_end]
         # seq_y_mark = self.data_stamp[r_begin:r_end]
 
 
-        return seq_x
+        return seq_x, seq_y
 
     def __len__(self):
         return len(self.data_x) - self.seq_len - self.label_len + 1

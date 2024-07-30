@@ -96,7 +96,8 @@ class Model(nn.Module):
                                       kernel_size = self.kernel_size, dilation=1,padding =0,stride=2)
         
 
-        input_size = int((self.enc_in*self.input_window_size-1)*self.num_filters)
+        input_size = self.enc_in*self.input_window_size
+        input_size = int((input_size*3-1-2-3)*self.num_filters/2)
         self.dense1 = nn.Linear(input_size, input_size//4)
         self.dense2 = nn.Linear(input_size//4, input_size//8)
         self.dense3 = nn.Linear(input_size//8, input_size//16)
@@ -107,20 +108,29 @@ class Model(nn.Module):
 
 
     def forward(self, inputs,_x,y,_y):
-        # print(f"shape of x {inputs.shape}")
 
         flattened_input = inputs.view(self.batch_size,1,-1)
 
         convoluted_d1 = self.conv1_layers(flattened_input).view(self.batch_size,1,-1)
-        convoluted_d1 = self.conv1_1_layers(flattened_input)
+        # print(f"shape of convoluted1 before stride x {convoluted_d1.shape}")
+
+        convoluted_d1 = self.conv1_1_layers(convoluted_d1)
+        # print(f"shape of convoluted1 x {convoluted_d1.shape}")
 
         convoluted_d2 = self.conv2_layers(flattened_input).view(self.batch_size,1,-1)
-        convoluted_d2 = self.conv2_1_layers(flattened_input)
+        # print(f"shape of convoluted2 before stride x {convoluted_d2.shape}")
+
+        convoluted_d2 = self.conv2_1_layers(convoluted_d2)
+        # print(f"shape of convoluted2 x {convoluted_d2.shape}")
 
         convoluted_d3 = self.conv3_layers(flattened_input).view(self.batch_size,1,-1)
-        convoluted_d3 = self.conv3_1_layers(flattened_input)
+        # print(f"shape of convoluted3 before stride x {convoluted_d3.shape}")
+
+        convoluted_d3 = self.conv3_1_layers(convoluted_d3)
+        # print(f"shape of convoluted3 x {convoluted_d3.shape}")
         
         convoluted = torch.cat([convoluted_d1,convoluted_d2,convoluted_d3],dim=2)
+        # print(f"shape of convoluted x {convoluted.shape}")
         
 
         x = F.relu(self.dense1(convoluted))

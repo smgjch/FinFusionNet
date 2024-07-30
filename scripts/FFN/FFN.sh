@@ -17,7 +17,7 @@ python -u run.py \
   --pred_len 0 \
   --label_len 1 \
   --kernel_size 2\
-  --num_kernels 10 \
+  --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
   --itr 1 \

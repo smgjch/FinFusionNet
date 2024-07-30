@@ -6,7 +6,7 @@ import torch.nn.init as init
 class Model(nn.Module):
     def __init__(self, input_size = 138, hidden_sizes = [], output_size = 1):
         super(Model, self).__init__()
-        hidden_sizes = [138,32,16,8,4,2]
+        hidden_sizes = [138,5,5,5,5,5,5,5]
         self.verbose = 0
         self.hidden_layers = nn.ModuleList()
         first = nn.Linear(138, hidden_sizes[0])

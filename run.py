@@ -1,5 +1,6 @@
 import argparse
 import os
+from exp.exp_long_term_forecasting_CGNN import Exp_Long_Term_Forecast_CGNN
 import torch
 from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
 from exp.exp_imputation import Exp_Imputation
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument('--tf', type=bool, default=False, required=False, help='if it is tensorflow model or pytorch model, torch by defualt')
     parser.add_argument('--model', type=str, required=True, default='Autoformer',
                         help='model name, options: [Autoformer, Transformer, TimesNet]')
+    parser.add_argument('--GNN_type', default=0, type=int,  help='Only for GNN, o for static graph, 1 for dynamic, 2 for hybird')
     
     # log config
     parser.add_argument('--write_graph', default=False, action='store_true',  help='write model graph to tensorboard')
@@ -165,12 +167,16 @@ if __name__ == '__main__':
     if args.task_name == 'long_term_forecast':
         Exp = Exp_Long_Term_Forecast
     elif args.task_name == 'short_term_forecast':
-        Exp = Exp_Short_Term_Forecast
+        Exp = Exp_Short_Term_Forecast    
+    elif args.task_name == 'long_term_forecast_CGNN':
+        Exp = Exp_Long_Term_Forecast_CGNN
     else:
         Exp = Exp_Long_Term_Forecast
 
     if args.is_training:
         for ii in range(args.itr):
+
+
             # setting record of experiments
             exp = Exp(args)  # set experiments
             setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_expand{}_dc{}_fc{}_eb{}_dt{}_{}_{}'.format(
@@ -195,6 +201,16 @@ if __name__ == '__main__':
                 args.des, ii)
 
             print('>>>>>>>start training : {}>>>>>>>>>>>>>>>>>>>>>>>>>>'.format(setting))
+                    # torch.backends.cuda.enable_flash_sdp(True)   # Use Flash Attention!!!
+
+            # with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=False, enable_mem_efficient=False):
+            #     print(torch.backends.cuda.flash_sdp_enabled())
+            #     # True
+            #     print(torch.backends.cuda.mem_efficient_sdp_enabled())
+            #     # False
+            #     print(torch.backends.cuda.math_sdp_enabled())
+            #     # False
+            #     exp.train(setting)
             exp.train(setting)
 
             print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))

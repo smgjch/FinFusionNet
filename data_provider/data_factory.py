@@ -1,4 +1,4 @@
-from data_provider.data_loader import Dataset_ETT_hour, Dataset_Custom, Dataset_btc, mDataset_btc
+from data_provider.data_loader import Dataset_ETT_hour, Dataset_Custom, Dataset_btc, m4Dataset_btc, mDataset_btc, mDataset_btc_CGNN
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
 
@@ -8,7 +8,9 @@ data_dict = {
     'ETTh2': Dataset_ETT_hour,
     'custom': Dataset_Custom,
     'btc': Dataset_btc,
-    "mbtc": mDataset_btc
+    "mbtc": mDataset_btc,
+    "mbtc_CGNN": mDataset_btc_CGNN,
+    "m4btc": m4Dataset_btc
 }
 
 

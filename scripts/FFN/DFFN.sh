@@ -17,7 +17,7 @@ python -u run.py \
   --pred_len 0 \
   --label_len 1 \
   --kernel_size 2\
-  --num_kernels 10 \
+  --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
   --itr 1 \
@@ -25,5 +25,6 @@ python -u run.py \
   --batch_size 128 \
   --patience 10 \
   --is_training 1 \
-  --gradient_checkpoint\
   --train_epochs 1000
+
+  # --gradient_checkpoint\

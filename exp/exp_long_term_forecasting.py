@@ -20,33 +20,6 @@ warnings.filterwarnings('ignore')
 
 
 
-def calculate_ic(predictions, actuals):
-    # Convert inputs to tensors if they aren't already
-    if not isinstance(predictions, torch.Tensor):
-        predictions = torch.tensor(predictions)
-    if not isinstance(actuals, torch.Tensor):
-        actuals = torch.tensor(actuals)
-
-    # Mean centering
-    pred_mean = torch.mean(predictions)
-    act_mean = torch.mean(actuals)
-    centered_predictions = predictions - pred_mean
-    centered_actuals = actuals - act_mean
-
-    # Covariance calculation
-    covariance = torch.mean(centered_predictions * centered_actuals)
-
-    # Standard deviation calculation
-    pred_std = torch.std(centered_predictions)
-    act_std = torch.std(centered_actuals)
-
-    # Information Coefficient calculation
-    ic = covariance / (pred_std * act_std)
-    print(f"pred_mean {pred_mean},act_mean {act_mean},covariance {covariance},pred_std {pred_std},act_std {act_std}")
-    # print(ic.item())
-    return ic.item()
-
-
 class Exp_Long_Term_Forecast(Exp_Basic):
     def __init__(self, args):
         super(Exp_Long_Term_Forecast, self).__init__(args)
@@ -57,13 +30,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         self.loger = tensorboard_helper.Loger(writer = writer, global_step = 0)
 
 
-
     def _build_model(self):
 
         model = self.model_dict[self.args.model].Model(self.args).float()
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
-
 
         return model
 
@@ -149,7 +120,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 #     print(f"np ic {ic} \n\n -------pred---------\n {pred} \n\n --------------true-------------\n {true}")
                 #     calculate_ic(pred, true)
 
-                total_loss.append(loss)
+                total_loss.append(loss.item())
                 # total_ic.append(ic[0][1])
 
 
@@ -288,6 +259,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             test_loss, tic = self.vali(test_data, test_loader, criterion)
 
             self.loger.writer.add_scalar('train_loss', train_loss, epoch)
+            self.loger.writer.add_scalar('val_loss', vali_loss, epoch)
+            self.loger.writer.add_scalar('test_loss', test_loss, epoch)
             self.loger.writer.add_scalar('test ic', tic, epoch)
             self.loger.writer.add_scalar('val ic', vic, epoch)
 

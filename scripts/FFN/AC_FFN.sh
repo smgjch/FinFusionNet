@@ -17,16 +17,16 @@ python -u run.py \
   --pred_len 0 \
   --label_len 1 \
   --kernel_size 2\
-  --num_kernels 8 \
+  --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
   --itr 1 \
   --num_workers 0 \
   --batch_size 128 \
-  --patience 10 \
+  --patience 3 \
   --is_training 1 \
-  --log_gradient \
-  --train_epochs 1000
-# --write_graph
+  --train_epochs 1000\
+  --write_graph
 # --log_gradient
-# --gradient_checkpoint
+# --gradient_checkpoint  
+# --log_gradient \

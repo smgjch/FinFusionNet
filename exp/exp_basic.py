@@ -3,7 +3,7 @@ import torch
 from models import Autoformer, PatchMixer, Transformer, TimesNet, Nonstationary_Transformer, DLinear, FEDformer, \
     Informer, LightTS, Reformer, ETSformer, Pyraformer, PatchTST, MICN, Crossformer, FiLM, iTransformer, \
     Koopa, TiDE, FreTS, TimeMixer, TSMixer, SegRNN, TemporalFusionTransformer, miTransformer
-from models.FFNs import FFN, AC_FFN, DFFN, FAC_DFFN, SAC_DFFN
+from models.FFNs import DTFFN, DTM_FFN, FFN, AC_FFN, DFFN, FAC_DFFN, GTFFN, MFFN, MFFN_D, SAC_DFFN, SAC_DFFN_D, CGDT_FFN_dynamic, CGDT_FFN_hybird, CGDT_FFN_static, DTFFN_Ablation, DTM_FFN_crossatten, DTM_FFN_dual, DTM_FFN_m
 
 from models.MLPs import  Baseline, Baseline_20, Baseline_10, Baseline_15, Baseline_20_m, Baseline_25, Baseline_25_m, Baseline_25_osci, Baseline_5
 class Exp_Basic(object):
@@ -37,11 +37,34 @@ class Exp_Basic(object):
             'SegRNN': SegRNN,
             'TemporalFusionTransformer': TemporalFusionTransformer,
             "PatchMixer": PatchMixer,
+
+
             "FFN": FFN,
             "AC_FFN": AC_FFN,
             "DFFN": DFFN,
+            
+            "MFFN": MFFN,
+            "MFFN_D": MFFN_D,
+
+            "GTFFN": GTFFN,
+
+
+            "DTFFN": DTFFN,
+            "DTFFN_Ablation": DTFFN_Ablation,
+            "DTM_FFN": DTM_FFN,
+            "DTM_FFN_m": DTM_FFN_m,
+            "DTM_FFN_dual": DTM_FFN_dual,
+            "DTM_FFN_crossatten": DTM_FFN_crossatten,
+
+            "CGDT_FFN_static": CGDT_FFN_static, 
+            "CGDT_FFN_dynamic": CGDT_FFN_dynamic, 
+            "CGDT_FFN_hybird": CGDT_FFN_hybird, 
+
             "SAC_DFFN": SAC_DFFN,
+            "SAC_DFFN_D": SAC_DFFN_D,
             "FAC_DFFN": FAC_DFFN,
+
+
             "Baseline": Baseline,
             "Baseline_5": Baseline_5,
             "Baseline_10": Baseline_10,

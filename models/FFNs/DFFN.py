@@ -89,7 +89,8 @@ class Model(nn.Module):
                                       kernel_size = self.kernel_size, dilation=3,padding =0)
         
         unconvuluted_size = self.enc_in*self.input_window_size
-        input_size = int((unconvuluted_size*3-1-2-2)*self.num_filters*3)
+        input_size = int((unconvuluted_size*3-1-2-3)*self.num_filters) # theree convulution layers, with increasing 
+                                                                        #dilation, casue a shrink of lenght of 1,2,and 3
         self.dense1 = nn.Linear(input_size, input_size//4)
         self.dense2 = nn.Linear(input_size//4, input_size//8)
         self.dense3 = nn.Linear(input_size//8, input_size//16)

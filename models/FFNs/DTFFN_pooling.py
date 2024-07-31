@@ -3,8 +3,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.checkpoint import checkpoint
-from flash_attn import flash_attn_func, flash_attn_qkvpacked_func
 
 
 class Model(nn.Module):
@@ -28,7 +26,7 @@ class Model(nn.Module):
         self.conv3_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
                                       kernel_size = self.kernel_size, dilation=3,padding =0)
      
-        self.pool1d = nn.MaxPool1d(kernel_size=2)
+        self.pool1d = nn.AvgPool1d(kernel_size=2)
 
 
 

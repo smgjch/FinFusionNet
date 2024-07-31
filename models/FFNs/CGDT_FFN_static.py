@@ -23,13 +23,14 @@ class Model(nn.Module):
         self.GNN_type = configs.GNN_type
 
         input_size = int(self.input_window_size)
+        attention_size = int(self.enc_in*self.input_window_size//5)
 
         self.h_conv1 = GCNConv(in_channels=input_size, out_channels=int(self.input_window_size//3*2))
-        self.h_conv2 = GCNConv(in_channels=int(self.input_window_size//3*2), out_channels=int(self.input_window_size//3)) 
-
-        self.encoder_layer = nn.TransformerEncoderLayer(d_model=self.enc_in*int(self.input_window_size//3*2), nhead=10, dim_feedforward=512)
+        self.h_conv2 = GCNConv(in_channels=int(self.input_window_size//3*2), out_channels=attention_size) 
+        # print(f"attention_size {attention_size}")
+        self.encoder_layer = nn.TransformerEncoderLayer(d_model=attention_size, nhead=3, dim_feedforward=512)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=4)
-        self.output_layer = nn.Linear(self.enc_in*10,self.label_len)
+        self.output_layer = nn.Linear(attention_size,self.label_len)
 
     def forward(self, inputs,edge_index, edge_attr):
         # print(f"edges shape{edge_index.shape, edge_attr.shape }")
@@ -38,16 +39,44 @@ class Model(nn.Module):
         # edge_attr = edge_attr.float()
         inputs = inputs.permute(0,2,1)
         x = self.h_conv1(inputs, edge_index,edge_attr)
+        # if torch.isnan(x).any():
+        #     print(f"convoluted x {x}")
+        #     print(f"inputs {inputs}")
+        #     print(f"edge_index {edge_index}")
+        #     print(f"edge_attr {edge_attr}")
+
         x = F.relu(x)
         x = self.h_conv2(x, edge_index, edge_attr)
+        # if torch.isnan(x).any():
+        #     print(f"conv2 nan {x}")
         x = F.relu(x)
         # print(f"shape of convoluted {x.shape}")
         x = x.view(self.batch_size,-1)
-        # print(f"shape of convoluted {x.shape}")
         # x = F.relu(self.projection(x))
+        # print(f"attention size {x.shape}")
         # x = torch.mean(x, dim=0) 
         x = self.transformer_encoder(x)
+        # if torch.isnan(x).any():
+        #     print(f"transformer nan {x}")
         # print(f"shape of transfomered {x.shape}")
         output = self.output_layer(x).view(self.batch_size, 1, -1)  # Flatten for dense layers    
+        # print(f"shape of output {output.shape}")
+        # print(f"output {output}")
+        # pred = output.detach().cpu()
+        # input_test = inputs.detach().cpu()
+        # if np.isnan(input_test).any():
+        #     print(f"why input contains nan {input_test}")
+
+        # if np.isnan(pred).any():
+            
+        #     print(f"------output is nan--------")
+        #     print(f"{pred}")
+        #     print(f"------inputs -------- \n {inputs}")
+        #     print(f"------edge_index--------\n {edge_index}")
+        #     print(f"------edge_attr--------\n {edge_attr}")
+
+
+
+        
         return output
   

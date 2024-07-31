@@ -670,7 +670,7 @@ class mDataset_btc_CGNN(Dataset):
             for j in range(num_nodes):
                 if i != j and abs(corr_matrix[i, j]) > threshold:
                     edge_index.append([i, j])
-                    edge_attr.append(corr_matrix[i, j])
+                    edge_attr.append(abs(corr_matrix[i, j]))
         
         edge_index = torch.tensor(edge_index, dtype=torch.long).t()
         edge_attr = torch.tensor(edge_attr, dtype=torch.float)  # Reshape to (num_edges, 1)

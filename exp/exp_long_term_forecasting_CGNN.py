@@ -27,7 +27,9 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
     def __init__(self, args):
         super(Exp_Long_Term_Forecast_CGNN, self).__init__(args)
 
-
+    def _select_optimizer(self):
+        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate, weight_decay=1e-5)
+        return model_optim
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
@@ -44,7 +46,7 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
 
                 edge_index, edge_attr = self.get_edges_when_training(batch_x,training=False)
                 edge_index, edge_attr = edge_index.to(self.device), edge_attr.to(self.device)
-
+                # print(f"edge {edge_index} \n attr {edge_attr}")
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
@@ -61,7 +63,11 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
                 if self.model.verbose:
                     print(f"in val output shape {outputs.shape}")
 
+                # print(f"in val output shape {outputs}")
+
                 outputs = outputs[:, -self.args.label_len:, 0:1]
+                # print(f"in val output shape after slice {outputs}")
+
                 batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device)
                 if self.model.verbose:
                     print(f"in val output shape after slice {outputs.shape}")
@@ -71,8 +77,12 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
 
                 pred = outputs.detach().cpu()
                 true = batch_y.detach().cpu()
-                # print(f"-------pred-----\n{pred.shape},{pred}")
-                # print(f"-------true-----\n{true.shape}, {true}")
+                # if np.isnan(pred).any():
+                #     print(f"Get from data loader, batch_x: \n{batch_x} \n\n batch_y{batch_y}\n\n")
+                #     print(f"edge_index {edge_index} \nedge_attr {edge_attr}")
+                #     print(f"detected nan in pred {pred}")
+                # else:
+                #     print(f"你过关！！！")
 
                 preds = torch.cat((preds, pred.reshape(-1)[:-1]), dim=0)
                 labels = torch.cat((labels, true.reshape(-1)[:-1]), dim=0)
@@ -83,7 +93,6 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
 
                 # ic = np.corrcoef(pred.reshape(-1),true.reshape(-1))
 
-                # if np.isnan(ic).any():
                 #     print(f"np ic {ic} \n\n -------pred---------\n {pred} \n\n --------------true-------------\n {true}")
                 #     calculate_ic(pred, true)
 
@@ -128,6 +137,7 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
 
     
     def get_edges_when_training(self,batch,training = True):
+        batch = batch.detach().cpu().numpy()
         if self.args.GNN_type ==0:
             return self.edge_index, self.edge_attr
         elif self.args.GNN_type == 1:

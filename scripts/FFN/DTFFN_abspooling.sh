@@ -1,6 +1,6 @@
 export CUDA_VISIBLE_DEVICES=0
 
-model_name=DTFFN_Ablation
+model_name=DTFFN_abspooling
 
 seq_len=30
 
@@ -20,10 +20,10 @@ python -u run.py \
   --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
-  --itr 10 \
+  --itr 5 \
   --num_workers 0 \
   --batch_size 128 \
-  --patience 10 \
+  --patience 3 \
   --is_training 1 \
   --use_amp\
   --train_epochs 1000\

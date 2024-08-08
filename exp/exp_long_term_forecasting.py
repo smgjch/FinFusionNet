@@ -14,6 +14,8 @@ from utils.dtw_metric import dtw,accelerated_dtw
 from utils.augmentation import run_augmentation,run_augmentation_single
 from torch.utils.tensorboard import SummaryWriter
 
+import matplotlib.pyplot as plt
+
 from datetime import datetime
 
 warnings.filterwarnings('ignore')
@@ -183,17 +185,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 batch_y = batch_y.float().to(self.device)
                 batch_x_mark = batch_x_mark.float().to(self.device)
                 batch_y_mark = batch_y_mark.float().to(self.device)
-                # print(f"before dec input checkpoint! shapes:  x shape: {batch_x.shape} y shape {batch_y.shape} \n")
-                # print(f"before decinput checkpoint! shapes:  x shape: {batch_x.shape} y shape {batch_y.shape} \n x: {batch_x}, \n y: \n {batch_y}")
-
-                # decoder input
-                # print(f"batch y \n {batch_y.shape} \n content: \n{batch_y}")
-
-                # dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
-                # dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
-                # # print(f"checkpoint! shapes:  x shape: {batch_x.shape} y shape {dec_inp.shape} \n x: {batch_x}, \n y: \n {dec_inp}")
-                # print(f"checkpoint! shapes:  x shape: {batch_x.shape} y shape {dec_inp.shape} ")
-
+              
                 # encoder - decoder
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
@@ -204,9 +196,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                         # f_dim = -1 if self.args.features == 'MS' else 0
                         outputs = outputs[:, -self.args.label_len:, 0:1]
-                        batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device)  # only for btc dataset since target is at first column
+                        batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device) # only for btc dataset since target is at first column
+                        # print(f"indeed here")
                         loss = criterion(outputs, batch_y)
                         train_loss.append(loss.item())
+
                 else:
                     # print("in else")
                     if self.args.output_attention:
@@ -219,14 +213,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     
                     f_dim = -1 if self.args.features == 'MS' else 0 # deprecate on btc dataset
 
+
                     outputs = outputs[:, -self.args.label_len:, 0:1]
                     
 
                     if self.model.verbose:    
                         print(f"in train, ouput after slice {outputs.shape}")
 
-                    batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device) # batch_y slice label only
-                    # print(f"in train, ouput after slice {batch_y.shape} \n {batch_y}")
+                    batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device) 
+                    # batch_y slice label only
+
+
                     
                     
                     if self.model.verbose:
@@ -274,6 +271,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 break
 
             adjust_learning_rate(model_optim, epoch + 1, self.args)
+
+        # convlayers = [self.model.conv1_layers, self.model.conv1_1_layers,
+        #               self.model.conv2_layers,self.model.conv2_1_layers,
+        #               self.model.conv3_layers,self.model.conv3_1_layers]
+        
+        # for layer in convlayers:
+        #     kernels = layer.weight.data.clone()
+        #     num_filters = kernels.size(0)
+        #     num_channels = kernels.size(1)
+        #     print(kernels)
+
 
         best_model_path = path + '/' + 'checkpoint.pth'
         self.model.load_state_dict(torch.load(best_model_path))

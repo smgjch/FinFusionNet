@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+from layers.AbsMaxPooling import MaxAbsolutePooling1D
 
 class Model(nn.Module):
     def __init__(self, configs):
@@ -26,7 +26,7 @@ class Model(nn.Module):
         self.conv3_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
                                       kernel_size = self.kernel_size, dilation=3,padding =0)
      
-        self.pool1d = nn.MaxPool1d(kernel_size=2)
+        self.pool1d = MaxAbsolutePooling1D(kernel_size=4,stride=2)
 
 
 

@@ -17,6 +17,7 @@ class Model(nn.Module):
 
         self.conv1_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
                                       kernel_size = self.kernel_size, dilation=1,padding =0)
+        
         input_size = int((self.enc_in*self.input_window_size-1)*self.num_filters)
         self.dense1 = nn.Linear(input_size, input_size//4)
         self.dense2 = nn.Linear(input_size//4, input_size//8)

@@ -8,7 +8,7 @@ python -u run.py \
   --task_name long_term_forecast_CGNN \
   --is_training 1 \
   --root_path ./dataset/btc/ \
-  --data_path btc_t_v_withftc.csv \
+  --data_path btc_t_v_withf4tc.csv \
   --model_id BTC_$seq_len'_'$pred_len \
   --model $model_name \
   --data mbtc_CGNN \
@@ -20,7 +20,7 @@ python -u run.py \
   --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
-  --itr 2 \
+  --itr 10 \
   --num_workers 0 \
   --batch_size 128 \
   --patience 3 \

@@ -1,6 +1,7 @@
 export CUDA_VISIBLE_DEVICES=0
 
-model_name=GTFFN
+model_name=SAC_DFFN
+
 seq_len=30
 
 python -u run.py \
@@ -19,7 +20,7 @@ python -u run.py \
   --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
-  --itr 10 \
+  --itr 5 \
   --num_workers 0 \
   --batch_size 128 \
   --patience 3 \
@@ -28,17 +29,21 @@ python -u run.py \
   --train_epochs 1000\
   --write_graph
 
-model_name=DTFFN
+
+export CUDA_VISIBLE_DEVICES=0
+
+model_name=SAC_DFFN_D
+
 seq_len=30
 
 python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/btc/ \
-  --data_path btc_t_v_withf4tc.csv \
+  --data_path btc_t_v_withftc.csv \
   --model_id BTC_$seq_len'_'$pred_len \
   --model $model_name \
-  --data m4btc \
+  --data mbtc \
   --features MS \
   --seq_len $seq_len \
   --pred_len 0 \
@@ -47,7 +52,7 @@ python -u run.py \
   --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
-  --itr 10 \
+  --itr 5 \
   --num_workers 0 \
   --batch_size 128 \
   --patience 3 \

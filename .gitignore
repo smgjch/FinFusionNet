@@ -8,3 +8,4 @@ test_results/
 utils/__pycache__/
 models/MLPs/__pycache__/
 data_provider/__pycache__/
+train_log_arch/

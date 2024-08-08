@@ -1,10 +1,10 @@
 export CUDA_VISIBLE_DEVICES=0
 
-model_name=DTFFN_Ablation
 
-seq_len=30
+model_name=LSTM_FFN
+seq_len=35
 
-python -u run.py \
+  python -u run.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/btc/ \
@@ -16,17 +16,15 @@ python -u run.py \
   --seq_len $seq_len \
   --pred_len 0 \
   --label_len 1 \
-  --kernel_size 2\
-  --num_kernels 2 \
+  --kernel_size 2 \
+  --num_kernels 4 \
   --enc_in 138 \
   --des 'Exp' \
-  --itr 10 \
+  --itr 5 \
   --num_workers 0 \
   --batch_size 128 \
-  --patience 10 \
+  --patience 3 \
   --is_training 1 \
   --use_amp\
   --train_epochs 1000\
   --write_graph
-
-  # --gradient_checkpoint\

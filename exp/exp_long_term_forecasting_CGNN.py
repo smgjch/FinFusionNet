@@ -28,7 +28,7 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
         super(Exp_Long_Term_Forecast_CGNN, self).__init__(args)
 
     def _select_optimizer(self):
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate, weight_decay=1e-5)
+        model_optim = optim.Rprop(self.model.parameters(), lr=self.args.learning_rate)
         return model_optim
 
     def vali(self, vali_data, vali_loader, criterion):

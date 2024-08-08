@@ -20,7 +20,7 @@ python -u run.py \
   --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
-  --itr 10 \
+  --itr 5 \
   --num_workers 0 \
   --batch_size 128 \
   --patience 3 \

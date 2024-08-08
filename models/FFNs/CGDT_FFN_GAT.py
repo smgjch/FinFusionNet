@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.checkpoint import checkpoint
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, GATConv
 from scipy.stats import pearsonr
 import numpy as np
 from torch_geometric.data import Data, Batch
@@ -25,10 +25,9 @@ class Model(nn.Module):
         input_size = self.input_window_size
         attention_size = self.enc_in*self.input_window_size//2
 
-        self.h_conv1 = GCNConv(in_channels=input_size, out_channels=input_size*4)
-        self.h_conv2 = GCNConv(in_channels=input_size*4, out_channels=input_size*2) 
-        self.h_conv3 = GCNConv(in_channels=input_size*2, out_channels=input_size) 
-        self.h_conv4 = GCNConv(in_channels=input_size, out_channels=input_size//2) 
+        self.conv1 = GATConv(in_channels=1, hidden_channels=2, heads=8, dropout=0.6)
+        self.conv2 = GATConv(hidden_channels=2, out_channels=1, heads=1, concat=False, dropout=0.6)
+
         # print(f"attention_size {attention_size}")
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=attention_size, nhead=3, dim_feedforward=512)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=4)

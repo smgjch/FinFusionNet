@@ -416,6 +416,7 @@ class mDataset_btc(Dataset):
 
         self.data_y = data[border1:border2][:,:1]
 
+
         # self.data_x = data[border1:border2]
 
         # self.data_y = data[border1:border2][:,:1]
@@ -604,8 +605,10 @@ class mDataset_btc_CGNN(Dataset):
                                           self.data_path))
        
         dataset_len = len(df_raw)
-        border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
-        border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)]
+        # border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
+        # border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)]        
+        border1s = [0,                       int(dataset_len*0.8*0.75), int(dataset_len*0.75)]
+        border2s = [int(dataset_len*0.8*0.75),int(dataset_len*0.75),     int(dataset_len)]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 
@@ -644,6 +647,7 @@ class mDataset_btc_CGNN(Dataset):
         self.data_x = data[border1:border2][:,1:]
 
         self.data_y = data[border1:border2][:,:1]
+
 
         # self.data_x = data[border1:border2]
 

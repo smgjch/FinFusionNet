@@ -2,7 +2,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 model_name=LSTM_FFN
-seq_len=35
+seq_len=96
 
   python -u run.py \
   --task_name long_term_forecast \
@@ -11,13 +11,13 @@ seq_len=35
   --data_path btc_t_v_withftc.csv \
   --model_id BTC_$seq_len'_'$pred_len \
   --model $model_name \
-  --data mbtc \
+  --data mbtc_block \
   --features MS \
   --seq_len $seq_len \
   --pred_len 0 \
   --label_len 1 \
   --kernel_size 2 \
-  --num_kernels 4 \
+  --num_kernels 6 \
   --enc_in 138 \
   --des 'Exp' \
   --itr 5 \

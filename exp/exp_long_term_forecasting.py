@@ -51,6 +51,26 @@ class Exp_Long_Term_Forecast(Exp_Basic):
     def _select_criterion(self):
         criterion = nn.MSELoss()
         return criterion
+    
+    # def _select_criterion(self):
+    #     def IC_MSE(output, target):
+    #         alpha = 0.5
+    #         # MSE Loss
+    #         mse_loss = nn.functional.mse_loss(output, target)
+
+    #         # Convert tensors to numpy arrays
+    #         output_np = output.detach().cpu().numpy().flatten()
+    #         target_np = target.detach().cpu().numpy().flatten()
+            
+    #         # Calculate correlation coefficient using np.corrcoef
+    #         corrcoef_matrix = np.corrcoef(output_np, target_np)
+    #         correlation_coefficient = corrcoef_matrix[0][1]
+    #         # Combined Loss
+    #         print(f"ic {correlation_coefficient}")
+    #         combined_loss = alpha * mse_loss + (1 - alpha) * (1 - correlation_coefficient)
+    #         return combined_loss
+    
+    #     return IC_MSE
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
@@ -60,7 +80,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
-                # print(f"Get from data loader, batch_x: \n{batch_x} \n\n batch_y{batch_y}")
+                # print(f"VAL Get from data loader, batch_x: \n{batch_x.shape} \n\n batch_y{batch_y.shape}")
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float()
 
@@ -86,6 +106,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                             outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
                         else:
                             outputs =  self.model(batch_x, batch_x_mark, 0, 0)
+
                 else:
                     if self.args.output_attention:
                         outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
@@ -112,8 +133,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 preds = torch.cat((preds, pred.reshape(-1)[:-1]), dim=0)
                 labels = torch.cat((labels, true.reshape(-1)[:-1]), dim=0)
                 # print(f"pre {pred.reshape(-1)[:-1]}\nlabel {true.reshape(-1)[:-1]}")
+                # print(f"pre shape {true.shape,pred.shape}")
 
-                loss = criterion(pred, true)
+                # loss = criterion(pred, true)
+                mse_loss = nn.functional.mse_loss(pred, true)
+
                 # ic = calculate_ic(pred, true)
 
                 # ic = np.corrcoef(pred.reshape(-1),true.reshape(-1))
@@ -122,13 +146,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 #     print(f"np ic {ic} \n\n -------pred---------\n {pred} \n\n --------------true-------------\n {true}")
                 #     calculate_ic(pred, true)
 
-                total_loss.append(loss.item())
+                total_loss.append(mse_loss.item())
                 # total_ic.append(ic[0][1])
 
 
         total_loss = np.average(total_loss)
         ic = np.corrcoef(preds,labels)
-        MSE = criterion(preds,labels)
         # total_ic = np.average(total_ic)
         # print(f" {ic[0][1]} \n ---------------- IC ----------------- \n {ic} \n ------------MSE-------------\n{MSE}")
         print(f" {ic[0][1]}\n")
@@ -151,7 +174,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
 
 
-        print(f"------verbose------- \n {self.args.verbose}")
+        # print(f"------verbose------- \n {self.args.verbose}")
         train_data, train_loader = self._get_data(flag='train')
         vali_data, vali_loader = self._get_data(flag='val')
         test_data, test_loader = self._get_data(flag='test')
@@ -176,6 +199,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             self.model.train()
             epoch_time = time.time()
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
+                # print(f"Train Get from data loader, batch_x: \n{batch_x.shape} \n\n batch_y{batch_y.shape}")
                 # print(f"get from loader {batch_x.shape}")
                 self.loger.global_step += 1
                 
@@ -193,13 +217,16 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                             outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0] # not entered does not matter
                         else:
                             outputs =  self.model(batch_x, batch_x_mark, 0, 0)
-
+                            # print(f"tain output shape {outputs.shape}")
                         # f_dim = -1 if self.args.features == 'MS' else 0
                         outputs = outputs[:, -self.args.label_len:, 0:1]
                         batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device) # only for btc dataset since target is at first column
                         # print(f"indeed here")
+
                         loss = criterion(outputs, batch_y)
-                        train_loss.append(loss.item())
+                        mse_loss = nn.functional.mse_loss(outputs, batch_y)
+
+                        train_loss.append(mse_loss.item())
 
                 else:
                     # print("in else")
@@ -230,10 +257,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         print(f"in train, batch_y shape after slice {batch_y.shape}")
                     
                     loss = criterion(outputs, batch_y)
-                    train_loss.append(loss.item())
+                    mse_loss = nn.functional.mse_loss(outputs, batch_y)
+
+                    train_loss.append(mse_loss.item())
 
                 if (i + 1) % 100 == 0:
-                    print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
+                    print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, mse_loss))
                     speed = (time.time() - time_now) / iter_count
                     left_time = speed * ((self.args.train_epochs - epoch) * train_steps - i)
                     print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))

@@ -2,7 +2,7 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 model_name=LSTM_FFN_sur
-seq_len=30
+seq_len=90
 
   python -u run.py \
   --task_name long_term_forecast \
@@ -17,7 +17,7 @@ seq_len=30
   --pred_len 0 \
   --label_len 1 \
   --kernel_size 2 \
-  --num_kernels 6 \
+  --num_kernels 4 \
   --enc_in 138 \
   --des 'Exp' \
   --itr 5 \

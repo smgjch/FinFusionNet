@@ -45,7 +45,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return data_set, data_loader
 
     def _select_optimizer(self):
-        model_optim = optim.Rprop(self.model.parameters(), lr=self.args.learning_rate)
+        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
         return model_optim
 
     def _select_criterion(self):
@@ -53,8 +53,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return criterion
     
     # def _select_criterion(self):
+    #     # print(f"yes triggered")
     #     def IC_MSE(output, target):
-    #         alpha = 0.5
+    #         alpha = 0.2
     #         # MSE Loss
     #         mse_loss = nn.functional.mse_loss(output, target)
 
@@ -66,8 +67,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
     #         corrcoef_matrix = np.corrcoef(output_np, target_np)
     #         correlation_coefficient = corrcoef_matrix[0][1]
     #         # Combined Loss
-    #         print(f"ic {correlation_coefficient}")
+    #         # print(f"ic {correlation_coefficient}")
     #         combined_loss = alpha * mse_loss + (1 - alpha) * (1 - correlation_coefficient)
+    #         # print(f"combined_loss type {type(combined_loss)},mse_loss type {type(mse_loss)},mse_loss item {type(mse_loss.item())}, combined_loss item {type(combined_loss.item())}")
+    #         # print(f"mse loss {mse_loss}, conbined loss {combined_loss}")
     #         return combined_loss
     
     #     return IC_MSE
@@ -86,19 +89,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 batch_x_mark = batch_x_mark.float().to(self.device)
                 batch_y_mark = batch_y_mark.float().to(self.device)
-
-                # if batch_y[:, -self.args.pred_len:, -1:].std() == 0:
-                #     print(f"Get from data loader, batch_x: \n{batch_x} \n\n batch_y{batch_y}")
-
-                # decoder input
-                # print(f"batch x \n {batch_x.shape} \n")
-
-                # print(f"batch y \n {batch_y.shape} \n")
-                # dec_inp = torch.zeros_like(batch_y[:, -self.args.pred_len:, :]).float()
-                # dec_inp = torch.cat([batch_y[:, :self.args.label_len, :], dec_inp], dim=1).float().to(self.device)
-                # # print(f"-------------dec_inp ------------\n{dec_inp.shape}")
-                dec_inp = 0
-
                 # encoder - decoder
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
@@ -132,19 +122,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 preds = torch.cat((preds, pred.reshape(-1)[:-1]), dim=0)
                 labels = torch.cat((labels, true.reshape(-1)[:-1]), dim=0)
-                # print(f"pre {pred.reshape(-1)[:-1]}\nlabel {true.reshape(-1)[:-1]}")
-                # print(f"pre shape {true.shape,pred.shape}")
 
-                # loss = criterion(pred, true)
                 mse_loss = nn.functional.mse_loss(pred, true)
 
-                # ic = calculate_ic(pred, true)
-
-                # ic = np.corrcoef(pred.reshape(-1),true.reshape(-1))
-
-                # if np.isnan(ic).any():
-                #     print(f"np ic {ic} \n\n -------pred---------\n {pred} \n\n --------------true-------------\n {true}")
-                #     calculate_ic(pred, true)
 
                 total_loss.append(mse_loss.item())
                 # total_ic.append(ic[0][1])
@@ -152,8 +132,6 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         total_loss = np.average(total_loss)
         ic = np.corrcoef(preds,labels)
-        # total_ic = np.average(total_ic)
-        # print(f" {ic[0][1]} \n ---------------- IC ----------------- \n {ic} \n ------------MSE-------------\n{MSE}")
         print(f" {ic[0][1]}\n")
         print(f"-----------prediction------- \n{preds}\n")
         print(f"-----------Lables------- \n{labels}\n")
@@ -440,4 +418,3 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         np.save(folder_path + 'true.npy', trues)
 
         return
-

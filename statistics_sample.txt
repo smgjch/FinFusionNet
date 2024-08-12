@@ -1,0 +1,347 @@
+True
+Args in experiment:
+Basic Config
+  Task Name:          long_term_forecast  Is Training:        1                   
+  Model ID:           BTC_30_             Model:              LSTM_FFN            
+
+Data Loader
+  Data:               mbtc_block          Root Path:          ./dataset/btc/      
+  Data Path:          btc_t_v_withftc.csv Features:           MS                  
+  Target:             OT                  Freq:               h                   
+  Checkpoints:        ./checkpoints/      
+
+Forecasting Task
+  Seq Len:            30                  Label Len:          1                   
+  Pred Len:           0                   Seasonal Patterns:  Monthly             
+  Inverse:            0                   
+
+Model Parameters
+  Top k:              5                   Num Kernels:        2                   
+  Enc In:             138                 Dec In:             7                   
+  C Out:              7                   d model:            512                 
+  n heads:            8                   e layers:           2                   
+  d layers:           1                   d FF:               2048                
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+  Output Attention:   0                   
+
+Run Parameters
+  Num Workers:        0                   Itr:                5                   
+  Train Epochs:       1000                Batch Size:         128                 
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                Exp                 Loss:               MSE                 
+  Lradj:              type1               Use Amp:            1                   
+
+GPU
+  Use GPU:            1                   GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+De-stationary Projector Params
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Use GPU: cuda:0
+>>>>>>>start training : long_term_forecast_BTC_30__LSTM_FFN_mbtc_block_ftMS_sl30_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+data: btc_t_v_withftc.csv, scale True, seq_len 30,  self.label_len 1, self.pred_len 0
+data: btc_t_v_withftc.csv, scale True, seq_len 30,  self.label_len 1, self.pred_len 0
+data: btc_t_v_withftc.csv, scale True, seq_len 30,  self.label_len 1, self.pred_len 0
+Epoch: 1 cost time: 1.004410982131958
+
+val ic:  -0.01536700179372697
+
+-----------prediction------- 
+tensor([-0.0510, -0.0469, -0.0428, -0.0366, -0.0387,  ..., -0.0484, -0.0426,
+        -0.0406, -0.0409, -0.0506])
+
+mean of prediction -0.0466008223593235, std of prediction 0.009119163267314434
+-----------Lables------- 
+tensor([-0.1429,  0.4297,  0.1691, -0.0753,  0.5915,  ...,  0.0550,  0.3121,
+         0.7920,  0.7550,  0.5651])
+
+mean of labels 0.058001384139060974, std of labels 1.0478500127792358
+
+test ic:  0.08866966348522824
+
+-----------prediction------- 
+tensor([-0.0488, -0.0621, -0.0593, -0.0440, -0.0442,  ..., -0.0374, -0.0415,
+        -0.0588, -0.0374, -0.0453])
+
+mean of prediction -0.04670350253582001, std of prediction 0.009088844992220402
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 1, Steps: 20 | Train Loss: 1.3077852 Vali Loss: 1.1009734 Test Loss: 1.1279509
+Validation loss decreased (inf --> 1.100973).  Saving model ...
+Updating learning rate to 0.0001
+Epoch: 2 cost time: 0.6805589199066162
+
+val ic:  -0.03383620683681014
+
+-----------prediction------- 
+tensor([-0.0257, -0.0352, -0.0245, -0.0391, -0.0608,  ..., -0.0343, -0.0470,
+        -0.0323, -0.0309, -0.0336])
+
+mean of prediction -0.032765209674835205, std of prediction 0.011460509151220322
+-----------Lables------- 
+tensor([-0.0921, -0.2849,  0.1131,  0.0684, -0.8901,  ...,  0.1282, -0.2395,
+         0.1615,  1.0181,  0.1020])
+
+mean of labels 0.05183134973049164, std of labels 1.0245110988616943
+
+test ic:  0.08716480366741487
+
+-----------prediction------- 
+tensor([-0.0356, -0.0520, -0.0490, -0.0299, -0.0305,  ..., -0.0213, -0.0265,
+        -0.0477, -0.0204, -0.0325])
+
+mean of prediction -0.03293992578983307, std of prediction 0.011222480796277523
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 2, Steps: 20 | Train Loss: 1.2729288 Vali Loss: 1.0972102 Test Loss: 1.1259191
+Validation loss decreased (1.100973 --> 1.097210).  Saving model ...
+Updating learning rate to 5e-05
+Epoch: 3 cost time: 0.6993567943572998
+
+val ic:  -0.01978345789262009
+
+-----------prediction------- 
+tensor([-0.0346, -0.0372, -0.0245, -0.0191, -0.0239,  ..., -0.0272, -0.0268,
+        -0.0373, -0.0209, -0.0250])
+
+mean of prediction -0.031334102153778076, std of prediction 0.011570310220122337
+-----------Lables------- 
+tensor([ 0.2210, -1.1561,  0.1204, -0.5162,  0.5492,  ...,  0.0140,  0.0403,
+        -0.3306, -0.2401, -0.1606])
+
+mean of labels 0.055239237844944, std of labels 1.0491243600845337
+
+test ic:  0.08674762262063508
+
+-----------prediction------- 
+tensor([-0.0342, -0.0508, -0.0479, -0.0284, -0.0289,  ..., -0.0197, -0.0249,
+        -0.0463, -0.0186, -0.0312])
+
+mean of prediction -0.031505610793828964, std of prediction 0.011417772620916367
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 3, Steps: 20 | Train Loss: 1.3143436 Vali Loss: 1.0988138 Test Loss: 1.1257413
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 2.5e-05
+Epoch: 4 cost time: 0.7503535747528076
+
+val ic:  -0.025133272381103088
+
+-----------prediction------- 
+tensor([-0.0277, -0.0188, -0.0260, -0.0205, -0.0360,  ..., -0.0276, -0.0524,
+        -0.0345, -0.0232, -0.0356])
+
+mean of prediction -0.03031001053750515, std of prediction 0.011918889358639717
+-----------Lables------- 
+tensor([ 0.1128,  0.1555,  0.1765,  0.1619, -0.0443,  ..., -0.6802, -0.1177,
+        -0.2521, -0.5613, -0.5116])
+
+mean of labels 0.05797929689288139, std of labels 1.0502887964248657
+
+test ic:  0.0866383236558012
+
+-----------prediction------- 
+tensor([-0.0332, -0.0503, -0.0474, -0.0272, -0.0278,  ..., -0.0183, -0.0236,
+        -0.0457, -0.0172, -0.0302])
+
+mean of prediction -0.030437402427196503, std of prediction 0.01174360141158104
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 4, Steps: 20 | Train Loss: 1.3045539 Vali Loss: 1.1046692 Test Loss: 1.1255778
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 1.25e-05
+Epoch: 5 cost time: 0.7473495006561279
+
+val ic:  -0.009887067535607174
+
+-----------prediction------- 
+tensor([-0.0170, -0.0474, -0.0202, -0.0467, -0.0186,  ..., -0.0167, -0.0215,
+        -0.0190, -0.0333, -0.0388])
+
+mean of prediction -0.02900741435587406, std of prediction 0.012134418822824955
+-----------Lables------- 
+tensor([-0.8811,  0.6592, -0.9464, -0.0724,  0.0095,  ...,  0.3768,  0.1974,
+        -6.4936, -0.0732,  0.4347])
+
+mean of labels 0.057137381285429, std of labels 1.0329252481460571
+
+test ic:  0.08624148409544923
+
+-----------prediction------- 
+tensor([-0.0320, -0.0494, -0.0465, -0.0259, -0.0265,  ..., -0.0169, -0.0221,
+        -0.0447, -0.0156, -0.0290])
+
+mean of prediction -0.02921905554831028, std of prediction 0.0119696706533432
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 5, Steps: 20 | Train Loss: 1.2117026 Vali Loss: 1.0768867 Test Loss: 1.1254248
+Validation loss decreased (1.097210 --> 1.076887).  Saving model ...
+Updating learning rate to 6.25e-06
+Epoch: 6 cost time: 0.7603933811187744
+
+val ic:  -0.0027025001730296614
+
+-----------prediction------- 
+tensor([-0.0323, -0.0350, -0.0255, -0.0169, -0.0237,  ..., -0.0200, -0.0195,
+        -0.0316, -0.0251, -0.0360])
+
+mean of prediction -0.028092078864574432, std of prediction 0.01219912152737379
+-----------Lables------- 
+tensor([ 0.2483,  0.5651,  0.1128,  0.0203,  0.5543,  ...,  0.3384, -0.8463,
+        -1.7471,  0.2707, -0.0029])
+
+mean of labels 0.06305181235074997, std of labels 1.0332049131393433
+
+test ic:  0.0859041421880348
+
+-----------prediction------- 
+tensor([-0.0312, -0.0487, -0.0459, -0.0248, -0.0257,  ..., -0.0159, -0.0210,
+        -0.0440, -0.0145, -0.0280])
+
+mean of prediction -0.028319748118519783, std of prediction 0.012139872647821903
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 6, Steps: 20 | Train Loss: 1.3073941 Vali Loss: 1.0677016 Test Loss: 1.1253147
+Validation loss decreased (1.076887 --> 1.067702).  Saving model ...
+Updating learning rate to 3.125e-06
+Epoch: 7 cost time: 0.7706756591796875
+
+val ic:  -0.03058561324006621
+
+-----------prediction------- 
+tensor([-0.0211, -0.0269, -0.0178, -0.0164, -0.0217,  ..., -0.0275, -0.0152,
+        -0.0481, -0.0237, -0.0229])
+
+mean of prediction -0.027509506791830063, std of prediction 0.012553906068205833
+-----------Lables------- 
+tensor([ 0.2796, -0.0481, -0.0564,  0.1616, -0.2629,  ...,  0.0953,  0.1555,
+         0.6889,  0.0217,  0.5543])
+
+mean of labels 0.057325124740600586, std of labels 1.0127397775650024
+
+test ic:  0.08570805549678571
+
+-----------prediction------- 
+tensor([-0.0306, -0.0483, -0.0455, -0.0239, -0.0249,  ..., -0.0150, -0.0201,
+        -0.0437, -0.0135, -0.0273])
+
+mean of prediction -0.027623213827610016, std of prediction 0.012346629984676838
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 7, Steps: 20 | Train Loss: 1.3056233 Vali Loss: 1.0281013 Test Loss: 1.1252172
+Validation loss decreased (1.067702 --> 1.028101).  Saving model ...
+Updating learning rate to 1.5625e-06
+Epoch: 8 cost time: 0.7715651988983154
+
+val ic:  -0.01861824313263488
+
+-----------prediction------- 
+tensor([-0.0167, -0.0217, -0.0226, -0.0329, -0.0434,  ..., -0.0307, -0.0168,
+        -0.0318, -0.0242, -0.0197])
+
+mean of prediction -0.026860803365707397, std of prediction 0.012556484900414944
+-----------Lables------- 
+tensor([ 1.6534,  0.4716,  0.2865, -0.5116, -0.7469,  ..., -0.5308, -1.0379,
+        -0.3147,  1.0618, -0.0985])
+
+mean of labels 0.055895667523145676, std of labels 1.050537109375
+
+test ic:  0.08561289979544809
+
+-----------prediction------- 
+tensor([-0.0301, -0.0479, -0.0453, -0.0234, -0.0244,  ..., -0.0142, -0.0194,
+        -0.0434, -0.0126, -0.0271])
+
+mean of prediction -0.027081966400146484, std of prediction 0.012551477178931236
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 8, Steps: 20 | Train Loss: 1.2956535 Vali Loss: 1.1041049 Test Loss: 1.1251338
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 7.8125e-07
+Epoch: 9 cost time: 0.7566061019897461
+
+val ic:  -0.02576488984885188
+
+-----------prediction------- 
+tensor([-0.0174, -0.0247, -0.0139, -0.0309, -0.0235,  ..., -0.0205, -0.0363,
+        -0.0237, -0.0316, -0.0219])
+
+mean of prediction -0.026182496920228004, std of prediction 0.012927805073559284
+-----------Lables------- 
+tensor([-0.4969,  0.1487,  0.0615,  0.5150, -0.1201,  ..., -0.8731,  0.1270,
+         0.1871,  0.2904,  0.0751])
+
+mean of labels 0.055804070085287094, std of labels 1.0477588176727295
+
+test ic:  0.08538098747101229
+
+-----------prediction------- 
+tensor([-0.0296, -0.0477, -0.0451, -0.0230, -0.0239,  ..., -0.0134, -0.0187,
+        -0.0429, -0.0116, -0.0270])
+
+mean of prediction -0.02652255818247795, std of prediction 0.01277141459286213
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 9, Steps: 20 | Train Loss: 1.3153011 Vali Loss: 1.0984152 Test Loss: 1.1250511
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 3.90625e-07
+Epoch: 10 cost time: 0.7564589977264404
+
+val ic:  -0.028083384093983966
+
+-----------prediction------- 
+tensor([-0.0104, -0.0519, -0.0153, -0.0413, -0.0259,  ..., -0.0288, -0.0129,
+        -0.0227, -0.0325, -0.0107])
+
+mean of prediction -0.025928743183612823, std of prediction 0.01310487650334835
+-----------Lables------- 
+tensor([ 0.0835, -0.0076,  0.5777,  3.0023, -0.2232,  ..., -0.2000,  0.4104,
+         0.7914,  0.1620,  0.0491])
+
+mean of labels 0.0580691359937191, std of labels 1.0475506782531738
+
+test ic:  0.08524176246058295
+
+-----------prediction------- 
+tensor([-0.0292, -0.0477, -0.0451, -0.0225, -0.0236,  ..., -0.0129, -0.0182,
+        -0.0428, -0.0109, -0.0269])
+
+mean of prediction -0.026159489527344704, std of prediction 0.012962663546204567
+-----------Lables------- 
+tensor([-0.7622, -0.1370, -0.0432, -0.5039, -0.7015,  ...,  0.2231,  2.2547,
+        -0.1804, -0.2366,  0.7197])
+
+mean of labels 0.02380305528640747, std of labels 1.062758207321167
+Epoch: 10, Steps: 20 | Train Loss: 1.3010380 Vali Loss: 1.0964085 Test Loss: 1.1249900
+EarlyStopping counter: 3 out of 3
+Early stopping

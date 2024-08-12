@@ -45,7 +45,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return data_set, data_loader
 
     def _select_optimizer(self):
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
+        model_optim = optim.Rprop(self.model.parameters(), lr=self.args.learning_rate)
         return model_optim
 
     def _select_criterion(self):
@@ -93,15 +93,15 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
+                            outputs =  self.model(batch_x, 0, 0, 0)[0]
                         else:
-                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)
+                            outputs =  self.model(batch_x, 0, 0, 0)
 
                 else:
                     if self.args.output_attention:
-                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
+                        outputs =  self.model(batch_x, 0, 0, 0)[0]
                     else:
-                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)
+                        outputs =  self.model(batch_x, 0, 0, 0)
                 f_dim = -1 if self.args.features == 'MS' else 0 #deprecate since label located at the thrid column
                 # f_dim = -1 if self.args.features == 'MS' or self.args.features == 'M' else 0
                 if self.model.verbose:
@@ -130,17 +130,19 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 # total_ic.append(ic[0][1])
 
 
-        total_loss = np.average(total_loss)
+        mean_loss = np.average(total_loss)
         ic = np.corrcoef(preds,labels)
         print(f" {ic[0][1]}\n")
         print(f"-----------prediction------- \n{preds}\n")
+
         print(f"-----------Lables------- \n{labels}\n")
+        print(f"mean of prediction {preds.mean()}, std of prediction {preds.std()}")
+        print(f"mean of labels {labels.mean()}, std of labels {labels.std()}")
+
         
         self.model.train()
-        return total_loss, ic[0][1]
-    
-
-    
+        return mean_loss, ic[0][1]
+      
     def train(self, setting):
 
         if self.args.write_graph:
@@ -192,9 +194,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0] # not entered does not matter
+                            outputs =  self.model(batch_x, 0, 0, 0)[0] # not entered does not matter
                         else:
-                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)
+                            outputs =  self.model(batch_x, 0, 0, 0)
                             # print(f"tain output shape {outputs.shape}")
                         # f_dim = -1 if self.args.features == 'MS' else 0
                         outputs = outputs[:, -self.args.label_len:, 0:1]
@@ -209,9 +211,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 else:
                     # print("in else")
                     if self.args.output_attention:
-                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
+                        outputs =  self.model(batch_x, 0, 0, 0)[0]
                     else:
-                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)
+                        outputs =  self.model(batch_x, 0, 0, 0)
                     
                     if self.model.verbose:
                         print(f"in train, ouput shape before slice {outputs.shape}")
@@ -330,15 +332,15 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.args.use_amp:
                     with torch.cuda.amp.autocast():
                         if self.args.output_attention:
-                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
+                            outputs =  self.model(batch_x, 0, 0, 0)[0]
                         else:
-                            outputs =  self.model(batch_x, batch_x_mark, 0, 0)
+                            outputs =  self.model(batch_x, 0, 0, 0)
                 else:
                     if self.args.output_attention:
-                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)[0]
+                        outputs =  self.model(batch_x, 0, 0, 0)[0]
 
                     else:
-                        outputs =  self.model(batch_x, batch_x_mark, 0, 0)
+                        outputs =  self.model(batch_x, 0, 0, 0)
 
                 f_dim = -1 if self.args.features == 'MS' else 0
 

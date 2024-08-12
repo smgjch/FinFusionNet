@@ -8,10 +8,10 @@ seq_len=30
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/btc/ \
-  --data_path btc_t_v_withf4tc.csv \
+  --data_path btc_t_v_withftc.csv \
   --model_id BTC_$seq_len'_'$pred_len \
   --model $model_name \
-  --data m4btc_block \
+  --data mbtc_block \
   --features MS \
   --seq_len $seq_len \
   --pred_len 0 \

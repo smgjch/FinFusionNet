@@ -11,7 +11,7 @@ python -u run.py \
   --data_path btc_t_v_withf4tc.csv \
   --model_id BTC_$seq_len'_'$pred_len \
   --model $model_name \
-  --data mbtc_CGNN \
+  --data m4btc_CGNN \
   --features MS \
   --seq_len $seq_len \
   --pred_len 0 \
@@ -20,7 +20,7 @@ python -u run.py \
   --num_kernels 2 \
   --enc_in 138 \
   --des 'Exp' \
-  --itr 10 \
+  --itr 5 \
   --num_workers 0 \
   --batch_size 128 \
   --patience 3 \

@@ -23,29 +23,21 @@ class Model(nn.Module):
         self.GNN_type = configs.GNN_type
 
         input_size = self.input_window_size
-        attention_size = self.enc_in*self.input_window_size//2
+        attention_size = self.enc_in*self.input_window_size//6
 
-        self.h_conv1 = GCNConv(in_channels=input_size, out_channels=input_size*4)
-        self.h_conv2 = GCNConv(in_channels=input_size*4, out_channels=input_size*2) 
-        self.h_conv3 = GCNConv(in_channels=input_size*2, out_channels=input_size) 
-        self.h_conv4 = GCNConv(in_channels=input_size, out_channels=input_size//2) 
+        self.h_conv1 = GCNConv(in_channels=input_size, out_channels=input_size//4*3)
+        self.h_conv2 = GCNConv(in_channels=input_size//4*3, out_channels=input_size//2) 
+        self.h_conv3 = GCNConv(in_channels=input_size//2, out_channels=input_size//4) 
+        self.h_conv4 = GCNConv(in_channels=input_size//4, out_channels=input_size//6) 
         # print(f"attention_size {attention_size}")
         self.encoder_layer = nn.TransformerEncoderLayer(d_model=attention_size, nhead=3, dim_feedforward=512)
         self.transformer_encoder = nn.TransformerEncoder(self.encoder_layer, num_layers=4)
         self.output_layer = nn.Linear(attention_size,self.label_len)
 
     def forward(self, inputs,edge_index, edge_attr):
-        # print(f"edges shape{edge_index.shape, edge_attr.shape }")
-        # print(f"edges content {edge_index, edge_attr }")
-        # edge_index = edge_index.long()
-        # edge_attr = edge_attr.float()
+
         inputs = inputs.permute(0,2,1)
         x = self.h_conv1(inputs, edge_index,edge_attr)
-        # if torch.isnan(x).any():
-        #     print(f"convoluted x {x}")
-        #     print(f"inputs {inputs}")
-        #     print(f"edge_index {edge_index}")
-        #     print(f"edge_attr {edge_attr}")
 
         x = F.relu(x)
         x = self.h_conv2(x, edge_index, edge_attr)

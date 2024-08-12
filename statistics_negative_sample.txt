@@ -1,0 +1,233 @@
+Use GPU: cuda:0
+>>>>>>>start training : long_term_forecast_BTC_30__DTFFN_mbtc_ftMS_sl30_ll1_pl0_dm512_nh8_el2_dl1_df2048_expand2_dc4_fc1_ebtimeF_dtTrue_Exp_3>>>>>>>>>>>>>>>>>>>>>>>>>>
+data: btc_t_v_withftc.csv, scale True, seq_len 30,  self.label_len 1, self.pred_len 0
+data: btc_t_v_withftc.csv, scale True, seq_len 30,  self.label_len 1, self.pred_len 0
+data: btc_t_v_withftc.csv, scale True, seq_len 30,  self.label_len 1, self.pred_len 0
+        iters: 100, epoch: 1 | loss: 0.8853891
+        speed: 0.0581s/iter; left time: 36270.5020s
+        iters: 200, epoch: 1 | loss: 0.8473527
+        speed: 0.0600s/iter; left time: 37414.8026s
+        iters: 300, epoch: 1 | loss: 3.0117950
+        speed: 0.0600s/iter; left time: 37409.7118s
+        iters: 400, epoch: 1 | loss: 1.1214904
+        speed: 0.0600s/iter; left time: 37406.4376s
+        iters: 500, epoch: 1 | loss: 0.7912933
+        speed: 0.0600s/iter; left time: 37398.1751s
+        iters: 600, epoch: 1 | loss: 0.6753393
+        speed: 0.0600s/iter; left time: 37389.2252s
+Epoch: 1 cost time: 37.27994918823242
+
+val ic:  0.01922494633101521
+
+-----------prediction------- 
+tensor([0.0109, 0.0111, 0.0122,  ..., 0.0075, 0.0112, 0.0139])
+
+mean of prediction 0.012347863055765629, std of prediction 0.002406083047389984
+-----------Lables------- 
+tensor([-0.4813, -0.4252,  0.0431,  ..., -0.1481,  0.2213,  0.1848])
+
+mean of labels 0.020707961171865463, std of labels 0.819220244884491
+
+test ic:  0.050930462082251444
+
+-----------prediction------- 
+tensor([0.0136, 0.0133, 0.0133,  ..., 0.0134, 0.0133, 0.0131])
+
+mean of prediction 0.012291863560676575, std of prediction 0.002305226167663932
+-----------Lables------- 
+tensor([-0.7622, -0.4658,  0.2449,  ..., -0.9469, -1.0834, -0.4681])
+
+mean of labels 0.019641311839222908, std of labels 1.003045678138733
+Epoch: 1, Steps: 624 | Train Loss: 2.9811002 Vali Loss: 0.6754378 Test Loss: 1.0041123
+Validation loss decreased (inf --> 0.675438).  Saving model ...
+Updating learning rate to 0.0001
+        iters: 100, epoch: 2 | loss: 0.7587347
+        speed: 0.1851s/iter; left time: 115398.7713s
+        iters: 200, epoch: 2 | loss: 0.8376879
+        speed: 0.0600s/iter; left time: 37376.4844s
+        iters: 300, epoch: 2 | loss: 0.8279944
+        speed: 0.0600s/iter; left time: 37373.5558s
+        iters: 400, epoch: 2 | loss: 1.0662000
+        speed: 0.0600s/iter; left time: 37367.4268s
+        iters: 500, epoch: 2 | loss: 0.9463605
+        speed: 0.0600s/iter; left time: 37363.3726s
+        iters: 600, epoch: 2 | loss: 3.5700030
+        speed: 0.0600s/iter; left time: 37353.8060s
+Epoch: 2 cost time: 37.457849979400635
+
+val ic:  0.025857115715658026
+
+-----------prediction------- 
+tensor([-0.0226, -0.0174, -0.0161,  ..., -0.0077, -0.0024, -0.0035])
+
+mean of prediction -0.011141004972159863, std of prediction 0.0064021931029856205
+-----------Lables------- 
+tensor([ 4.1572, -0.3797, -0.7978,  ...,  0.0125,  0.1031,  0.2455])
+
+mean of labels 0.02108905464410782, std of labels 0.8192187547683716
+
+test ic:  0.03666323516969754
+
+-----------prediction------- 
+tensor([-0.0093, -0.0093, -0.0086,  ..., -0.0071, -0.0080, -0.0089])
+
+mean of prediction -0.011269460432231426, std of prediction 0.006094952113926411
+-----------Lables------- 
+tensor([-0.7622, -0.4658,  0.2449,  ..., -0.9469, -1.0834, -0.4681])
+
+mean of labels 0.019641311839222908, std of labels 1.003045678138733
+Epoch: 2, Steps: 624 | Train Loss: 1.0014340 Vali Loss: 0.6762324 Test Loss: 1.0048416
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 5e-05
+        iters: 100, epoch: 3 | loss: 0.5587652
+        speed: 0.1729s/iter; left time: 107685.8980s
+        iters: 200, epoch: 3 | loss: 0.8202826
+        speed: 0.0600s/iter; left time: 37340.9940s
+        iters: 300, epoch: 3 | loss: 0.9551976
+        speed: 0.0600s/iter; left time: 37331.7578s
+        iters: 400, epoch: 3 | loss: 1.7735310
+        speed: 0.0600s/iter; left time: 37328.4920s
+        iters: 500, epoch: 3 | loss: 3.4342861
+        speed: 0.0600s/iter; left time: 37328.0796s
+        iters: 600, epoch: 3 | loss: 1.1340034
+        speed: 0.0600s/iter; left time: 37312.8575s
+Epoch: 3 cost time: 37.43767857551575
+
+val ic:  0.035025593977546836
+
+-----------prediction------- 
+tensor([ 0.0018,  0.0559,  0.0585,  ..., -0.0002, -0.0080, -0.0329])
+
+mean of prediction 0.015084505081176758, std of prediction 0.0548953115940094
+-----------Lables------- 
+tensor([ 1.1047,  0.3438, -0.1617,  ...,  0.3535,  0.2309, -1.4190])
+
+mean of labels 0.018979953601956367, std of labels 0.820805013179779
+
+test ic:  0.02434588167210545
+
+-----------prediction------- 
+tensor([0.0307, 0.0336, 0.0399,  ..., 0.0409, 0.0315, 0.0217])
+
+mean of prediction 0.012568063102662563, std of prediction 0.04531608521938324
+-----------Lables------- 
+tensor([-0.7622, -0.4658,  0.2449,  ..., -0.9469, -1.0834, -0.4681])
+
+mean of labels 0.019641311839222908, std of labels 1.003045678138733
+Epoch: 3, Steps: 624 | Train Loss: 0.9999859 Vali Loss: 0.6753754 Test Loss: 1.0041972
+Validation loss decreased (0.675438 --> 0.675375).  Saving model ...
+Updating learning rate to 2.5e-05
+        iters: 100, epoch: 4 | loss: 0.9011117
+        speed: 0.2055s/iter; left time: 127854.3434s
+        iters: 200, epoch: 4 | loss: 1.1810464
+        speed: 0.0600s/iter; left time: 37305.5310s
+        iters: 300, epoch: 4 | loss: 0.7737033
+        speed: 0.0600s/iter; left time: 37290.1821s
+        iters: 400, epoch: 4 | loss: 0.7732793
+        speed: 0.0600s/iter; left time: 37294.4207s
+        iters: 500, epoch: 4 | loss: 0.6934017
+        speed: 0.0600s/iter; left time: 37287.1046s
+        iters: 600, epoch: 4 | loss: 0.7321161
+        speed: 0.0600s/iter; left time: 37282.3644s
+Epoch: 4 cost time: 37.51314878463745
+
+val ic:  0.03205227293311011
+
+-----------prediction------- 
+tensor([ 0.1179,  0.0529,  0.0603,  ..., -0.1556,  0.0633,  0.0508])
+
+mean of prediction 0.02589399181306362, std of prediction 0.07468054443597794
+-----------Lables------- 
+tensor([-0.5547,  0.4824,  0.4365,  ..., -0.1819,  0.6595,  0.0125])
+
+mean of labels 0.019506851211190224, std of labels 0.8209652900695801
+
+test ic:  0.037858038547111346
+
+-----------prediction------- 
+tensor([0.0526, 0.0577, 0.0676,  ..., 0.0427, 0.0292, 0.0159])
+
+mean of prediction 0.018868450075387955, std of prediction 0.06445080786943436
+-----------Lables------- 
+tensor([-0.7622, -0.4658,  0.2449,  ..., -0.9469, -1.0834, -0.4681])
+
+mean of labels 0.019641311839222908, std of labels 1.003045678138733
+Epoch: 4, Steps: 624 | Train Loss: 0.9964926 Vali Loss: 0.6771227 Test Loss: 1.0035837
+EarlyStopping counter: 1 out of 3
+Updating learning rate to 1.25e-05
+        iters: 100, epoch: 5 | loss: 0.5499862
+        speed: 0.1720s/iter; left time: 106851.0782s
+        iters: 200, epoch: 5 | loss: 0.5253441
+        speed: 0.0600s/iter; left time: 37264.5505s
+        iters: 300, epoch: 5 | loss: 0.9566070
+        speed: 0.0638s/iter; left time: 39661.1948s
+        iters: 400, epoch: 5 | loss: 0.5607016
+        speed: 0.0645s/iter; left time: 40058.7258s
+        iters: 500, epoch: 5 | loss: 0.9696782
+        speed: 0.0645s/iter; left time: 40052.8136s
+        iters: 600, epoch: 5 | loss: 1.3495038
+        speed: 0.0645s/iter; left time: 40031.0423s
+Epoch: 5 cost time: 39.27796459197998
+
+val ic:  0.012521575365615678
+
+-----------prediction------- 
+tensor([ 0.0444,  0.0917, -0.2397,  ...,  0.0068,  0.0732,  0.0602])
+
+mean of prediction -0.02922445349395275, std of prediction 0.12248757481575012
+-----------Lables------- 
+tensor([ 0.2579, -0.4866, -1.0463,  ..., -0.0249,  1.1503, -2.6229])
+
+mean of labels 0.0201181098818779, std of labels 0.8225175738334656
+
+test ic:  0.06870080600915837
+
+-----------prediction------- 
+tensor([ 0.0307,  0.0298,  0.0474,  ..., -0.0310, -0.0376, -0.0428])
+
+mean of prediction -0.03134812042117119, std of prediction 0.15429386496543884
+-----------Lables------- 
+tensor([-0.7622, -0.4658,  0.2449,  ..., -0.9469, -1.0834, -0.4681])
+
+mean of labels 0.019641311839222908, std of labels 1.003045678138733
+Epoch: 5, Steps: 624 | Train Loss: 0.9862388 Vali Loss: 0.6902464 Test Loss: 1.0095417
+EarlyStopping counter: 2 out of 3
+Updating learning rate to 6.25e-06
+        iters: 100, epoch: 6 | loss: 0.8202750
+        speed: 0.1776s/iter; left time: 110230.1623s
+        iters: 200, epoch: 6 | loss: 1.3581929
+        speed: 0.0645s/iter; left time: 40006.9122s
+        iters: 300, epoch: 6 | loss: 1.6040699
+        speed: 0.0644s/iter; left time: 39993.0819s
+        iters: 400, epoch: 6 | loss: 1.1031426
+        speed: 0.0644s/iter; left time: 39979.3932s
+        iters: 500, epoch: 6 | loss: 1.5953360
+        speed: 0.0645s/iter; left time: 39997.1273s
+        iters: 600, epoch: 6 | loss: 0.6027150
+        speed: 0.0645s/iter; left time: 39984.1982s
+Epoch: 6 cost time: 40.215829849243164
+
+val ic:  0.020327985178088596
+
+-----------prediction------- 
+tensor([ 0.1255,  0.0469,  0.0024,  ..., -0.4163, -0.1451,  0.3115])
+
+mean of prediction 0.023362305015325546, std of prediction 0.206618994474411
+-----------Lables------- 
+tensor([ 0.9379,  1.3165,  0.4649,  ...,  0.3095,  0.2522, -0.4131])
+
+mean of labels 0.018159523606300354, std of labels 0.8129163384437561
+
+test ic:  0.09371145484229534
+
+-----------prediction------- 
+tensor([0.2415, 0.2303, 0.2678,  ..., 0.0912, 0.1038, 0.1083])
+
+mean of prediction 0.06899852305650711, std of prediction 0.32070285081863403
+-----------Lables------- 
+tensor([-0.7622, -0.4658,  0.2449,  ..., -0.9469, -1.0834, -0.4681])
+
+mean of labels 0.019641311839222908, std of labels 1.003045678138733
+Epoch: 6, Steps: 624 | Train Loss: 0.9628927 Vali Loss: 0.7110020 Test Loss: 1.0497037
+EarlyStopping counter: 3 out of 3
+Early stopping

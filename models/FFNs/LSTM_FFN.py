@@ -23,10 +23,9 @@ class Model(nn.Module):
         # Set print options 
         torch.set_printoptions(threshold=100, edgeitems=5)
 
-
         input_size = 20*self.num_filters*self.enc_in//2
         # input_size = 4139
-        LSTM_layers = 5
+        LSTM_layers = 4
         hidden_size = 128
 
         self.projection1 = nn.Linear(input_size, input_size//2)
@@ -70,10 +69,10 @@ class Model(nn.Module):
         # print(f"shape of before lstm {convoluted.shape}")
         output = self.lstm(convoluted)[1][0]
 
-        output = output.permute(1,0,2)
+        output = output.permute(1,0,2)[:,-1:,:]
         # print(f"shape of lstm {output.shape}")
 
-        output = self.output_layer(output)[:,-1:,:]
+        output = self.output_layer(output)
         # print(f"shape of output {output.shape}")
 
         return output

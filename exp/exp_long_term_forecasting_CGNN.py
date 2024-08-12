@@ -107,7 +107,11 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
         # print(f" {ic[0][1]} \n ---------------- IC ----------------- \n {ic} \n ------------MSE-------------\n{MSE}")
         print(f" {ic[0][1]}\n")
         print(f"-----------prediction------- \n{preds}\n")
+        print(f"mean of prediction {preds.mean()}, std of prediction {preds.std()}")
+
         print(f"-----------Lables------- \n{labels}\n")
+        print(f"mean of labels {labels.mean()}, std of labels {labels.std()}")
+
         
         self.model.train()
         return total_loss, ic[0][1]

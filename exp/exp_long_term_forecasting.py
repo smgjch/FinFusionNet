@@ -38,6 +38,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
 
+        amount = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        print(f"Number of parameters: {amount}")
+        
         return model
 
     def _get_data(self, flag):

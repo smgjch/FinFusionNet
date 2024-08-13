@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from layers.AbsMaxPooling import MaxAbsolutePooling1D
+
+
 class Model(nn.Module):
     def __init__(self, configs):
         super(Model, self).__init__()
@@ -31,11 +31,16 @@ class Model(nn.Module):
         self.projection1 = nn.Linear(input_size, input_size//2)
         self.dropout_P = nn.Dropout(p=0.5)  # Dropout after first conv layer
 
-        self.lstm = nn.LSTM(input_size=input_size//2, 
+        self.lstm = nn.RNN(input_size=input_size//2, 
                             hidden_size=hidden_size, 
                             num_layers=LSTM_layers, 
                             batch_first=True,
-                            dropout=0.5)
+                            dropout=0.5)        
+        # self.lstm = nn.RNN(input_size=input_size//2, 
+        #                     hidden_size=hidden_size, 
+        #                     num_layers=LSTM_layers, 
+        #                     batch_first=True,
+        #                     dropout=0.5)
 
         self.output_layer = nn.Linear(hidden_size, self.label_len)
 
@@ -48,7 +53,7 @@ class Model(nn.Module):
             # print(f"shape of current slice {slice_.shape}")
 
             sampled = self.t_sampling(slice_)
-            # print(f"shape of convoulted slice {sampled.shape}")
+            # print(f"shape of before projection {sampled.shape}")
             sampled = self.projection1(sampled)
             sampled = self.dropout_P(sampled)
 
@@ -57,6 +62,7 @@ class Model(nn.Module):
     
     def t_sampling(self,inputs):
         flattened_input = inputs.view(self.batch_size, 1, -1)
+        # print(f"shape of conv input {flattened_input.shape}")
         convoluted = self.conv1_layers(flattened_input)
         convoluted = self.dropout_conv1(convoluted)
         convoluted = convoluted.view(self.batch_size,1,-1)
@@ -66,11 +72,13 @@ class Model(nn.Module):
     
     def forward(self, inputs, _x, y, _y):
         convoluted = self.patch_conv(inputs)
-        # print(f"shape of before lstm {convoluted.shape}")
-        output = self.lstm(convoluted)[1][0]
+        # print(f"shape of before RNN {convoluted.shape}")
+        output = self.lstm(convoluted)[1]
+        # output = self.lstm(convoluted)[1][0]
+        # print(f"shape of after RNN {output.shape}")
 
         output = output.permute(1,0,2)[:,-1:,:]
-        # print(f"shape of lstm {output.shape}")
+        # print(f"shape of output {output.shape}")
 
         output = self.output_layer(output)
         # print(f"shape of output {output.shape}")

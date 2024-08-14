@@ -137,7 +137,7 @@ class DataEmbedding_inverted(nn.Module):
         # x: [Batch Variate Time]
 
         # since timestamp is not proccessed, here fix to not include time to features
-        if x_mark is None:
+        if x_mark is None or x_mark == 0:
             x = self.value_embedding(x)
         else:
             to_embed = torch.cat([x, x_mark.permute(0, 2, 1)], 1)

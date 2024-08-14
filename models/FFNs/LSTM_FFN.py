@@ -17,7 +17,7 @@ class Model(nn.Module):
                                       kernel_size = self.kernel_size, dilation=1,padding ="same")
         self.dropout_conv1 = nn.Dropout(p=0.5)  # Dropout after first conv layer
 
-        self.pool1d = nn.MaxPool1d(kernel_size=2)
+        self.pool1d = nn.MaxPool1d(kernel_size=4)
 
 
         # Set print options 
@@ -28,10 +28,10 @@ class Model(nn.Module):
         LSTM_layers = 4
         hidden_size = 128
 
-        self.projection1 = nn.Linear(input_size, input_size//2)
+        # self.projection1 = nn.Linear(input_size, input_size//2)
         self.dropout_P = nn.Dropout(p=0.5)  # Dropout after first conv layer
 
-        self.lstm = nn.RNN(input_size=input_size//2, 
+        self.lstm = nn.LSTM(input_size=input_size//2, 
                             hidden_size=hidden_size, 
                             num_layers=LSTM_layers, 
                             batch_first=True,
@@ -54,7 +54,7 @@ class Model(nn.Module):
 
             sampled = self.t_sampling(slice_)
             # print(f"shape of before projection {sampled.shape}")
-            sampled = self.projection1(sampled)
+            # sampled = self.projection1(sampled)
             sampled = self.dropout_P(sampled)
 
             conved = torch.cat([conved,sampled],dim=1)
@@ -73,8 +73,8 @@ class Model(nn.Module):
     def forward(self, inputs, _x, y, _y):
         convoluted = self.patch_conv(inputs)
         # print(f"shape of before RNN {convoluted.shape}")
-        output = self.lstm(convoluted)[1]
-        # output = self.lstm(convoluted)[1][0]
+        # output = self.lstm(convoluted)[1]
+        output = self.lstm(convoluted)[1][0]
         # print(f"shape of after RNN {output.shape}")
 
         output = output.permute(1,0,2)[:,-1:,:]

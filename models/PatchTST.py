@@ -41,7 +41,8 @@ class Model(nn.Module):
         super().__init__()
         self.task_name = configs.task_name
         self.seq_len = configs.seq_len
-        self.pred_len = configs.pred_len
+        self.pred_len = configs.label_len
+        self.verbose = configs.verbose
         padding = stride
 
         # patching and embedding

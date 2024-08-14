@@ -225,7 +225,7 @@ class Model_BSonly(nn.Module):
 
         return output
 
-class Model_onlyLSTM(nn.Module):
+class Model(nn.Module):
     def __init__(self, configs):
         super(Model, self).__init__()
         self.verbose = configs.verbose
@@ -239,11 +239,13 @@ class Model_onlyLSTM(nn.Module):
         # self.conv1_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
         #                               kernel_size = self.kernel_size, dilation=1,padding ="same")
         # self.dropout_conv1 = nn.Dropout(p=0.5)  # Dropout after first conv layer
+        # Set print options 
+        torch.set_printoptions(threshold=100, edgeitems=5)
 
         # self.pool1d = nn.MaxPool1d(kernel_size=2)
         input_size = self.enc_in
         # input_size = 4139
-        LSTM_layers = 4
+        LSTM_layers = 1
         hidden_size = 128
 
         # self.projection1 = nn.Linear(input_size, input_size//2)

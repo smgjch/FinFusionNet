@@ -8,7 +8,7 @@ seq_len=30
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/btc/ \
-  --data_path btc_t_v_withftc.csv \
+  --data_path btc_8tc_noi.csv \
   --model_id BTC_$seq_len'_'$pred_len \
   --model $model_name \
   --data mbtc_block \
@@ -18,7 +18,7 @@ seq_len=30
   --label_len 1 \
   --kernel_size 2 \
   --num_kernels 2 \
-  --enc_in 138 \
+  --enc_in 4 \
   --des 'Exp' \
   --itr 5 \
   --num_workers 0 \

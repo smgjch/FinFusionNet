@@ -375,8 +375,15 @@ class mDataset_btc_block(Dataset):
         # print("Triggered!!!!!")
        
         dataset_len = len(df_raw)
+        # border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
+        # border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len*0.6)]
+        
+        # border1s = [int(dataset_len*0.5),                       int(dataset_len*0.9), int(dataset_len*0.95)]
+        # border2s = [int(dataset_len*0.9),int(dataset_len*0.95),     int(dataset_len)]
+
         border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
-        border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)]
+        border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)//8*5]
+        
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 
@@ -493,7 +500,9 @@ class m4Dataset_btc_block(Dataset):
        
         dataset_len = len(df_raw)
         border1s = [0,                       int(dataset_len*0.8*0.8), int(dataset_len*0.8)]
+        # border1s = [int(dataset_len*0.5),                       int(dataset_len*0.9), int(dataset_len*0.95)]
         border2s = [int(dataset_len*0.8*0.8),int(dataset_len*0.8),     int(dataset_len)]
+        # border2s = [int(dataset_len*0.9),int(dataset_len*0.95),     int(dataset_len)]
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 
@@ -890,8 +899,13 @@ class mDataset_btc(Dataset):
         # print("Triggered!!!!!")
        
         dataset_len = len(df_raw)
+        # border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
+        # border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)]
+        
+
         border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
-        border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)]
+        border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)//8*5]
+        
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
 

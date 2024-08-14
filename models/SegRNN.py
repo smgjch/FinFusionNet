@@ -22,11 +22,11 @@ class Model(nn.Module):
         if self.task_name == 'classification' or self.task_name == 'anomaly_detection' or self.task_name == 'imputation':
             self.pred_len = configs.seq_len
         else:
-            self.pred_len = configs.pred_len
+            self.pred_len = configs.label_len
 
         self.seg_len = configs.seg_len
         self.seg_num_x = self.seq_len // self.seg_len
-        self.seg_num_y = self.pred_len // self.seg_len
+        self.seg_num_y = self.pred_len // self.seg_len if self.pred_len // self.seg_len != 0 else 1
 
         # building model
         self.valueEmbedding = nn.Sequential(
@@ -53,7 +53,7 @@ class Model(nn.Module):
         # b:batch_size c:channel_size s:seq_len s:seq_len
         # d:d_model w:seg_len n:seg_num_x m:seg_num_y
         batch_size = x.size(0)
-
+        print(f"shape of x {x.shape}")
         # normalization and permute     b,s,c -> b,c,s
         seq_last = x[:, -1:, :].detach()
         x = (x - seq_last).permute(0, 2, 1) # b,c,s
@@ -76,7 +76,7 @@ class Model(nn.Module):
 
         # 1,bcm,d -> 1,bcm,w -> b,c,s
         y = self.predict(hy).view(-1, self.enc_in, self.pred_len)
-
+        print(f"shape of y {y.shape, seq_last.shape}")
         # permute and denorm
         y = y.permute(0, 2, 1) + seq_last
         return y

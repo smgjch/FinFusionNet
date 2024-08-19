@@ -1,4 +1,4 @@
-from data_provider.data_loader import Dataset_ETT_hour, Dataset_Custom, Dataset_btc, m4Dataset_btc, m4Dataset_btc_CGNN, m4Dataset_btc_block, mDataset_btc, mDataset_btc_CGNN, mDataset_btc_block, mDataset_test
+from data_provider.data_loader import Dataset_ETT_hour, Dataset_Custom, Dataset_btc, m4Dataset_btc, m4Dataset_btc_CGNN, m4Dataset_btc_block, mDataset_btc, mDataset_btc_CGNN, mDataset_btc_GNN, mDataset_btc_block, mDataset_test
 from data_provider.uea import collate_fn
 from torch.utils.data import DataLoader
 
@@ -14,7 +14,8 @@ data_dict = {
     "m4btc_CGNN": m4Dataset_btc_CGNN,
     "m4btc": m4Dataset_btc,
     "m4btc_block": m4Dataset_btc_block,
-    "mDataset_test": mDataset_test
+    "mDataset_test": mDataset_test,
+    "mDataset_btc_GNN":mDataset_btc_GNN
 }
 
 

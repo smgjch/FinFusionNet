@@ -375,18 +375,18 @@ class mDataset_btc_block(Dataset):
         # print("Triggered!!!!!")
        
         dataset_len = len(df_raw)
-        # border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
-        # border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len*0.6)]
+        # border1s = [0,                       int(dataset_len*0.8), int(dataset_len*0.9)]
+        # border2s = [int(dataset_len*0.8),int(dataset_len*0.9),     int(dataset_len)]
         
-        # border1s = [int(dataset_len*0.5),                       int(dataset_len*0.9), int(dataset_len*0.95)]
-        # border2s = [int(dataset_len*0.9),int(dataset_len*0.95),     int(dataset_len)]
+        # border1s = [int(dataset_len*0.3), int(dataset_len*0.85), int(dataset_len*0.92)]
+        # border2s = [int(dataset_len*0.85),int(dataset_len*0.92),     int(dataset_len)]
 
         border1s = [0,                       int(dataset_len*0.8*0.5), int(dataset_len*0.5)]
         border2s = [int(dataset_len*0.8*0.5),int(dataset_len*0.5),     int(dataset_len)//8*5]
         
         border1 = border1s[self.set_type]
         border2 = border2s[self.set_type]
-
+        # print(f"board {border1,border2}")
         if self.features == 'M' or self.features == 'MS':
             cols_data = df_raw.columns[2:]
             # print(cols_data)
@@ -403,18 +403,18 @@ class mDataset_btc_block(Dataset):
         else:
             data = df_data.values
 
-        df_stamp = df_raw[['time']][border1:border2]
-        df_stamp['time'] = pd.to_datetime(df_stamp.time)
-        if self.timeenc == 0:
-            df_stamp['month'] = df_stamp.time.apply(lambda row: row.month, 1)
-            df_stamp['day'] = df_stamp.time.apply(lambda row: row.day, 1)
-            df_stamp['weekday'] = df_stamp.time.apply(lambda row: row.weekday(), 1)
-            df_stamp['hour'] = df_stamp.time.apply(lambda row: row.hour, 1)
-            df_stamp['minute'] = df_stamp.time.apply(lambda row: row.minute, 1)
-            data_stamp = df_stamp.drop(['time'], 1).values
-        elif self.timeenc == 1:
-            data_stamp = time_features(pd.to_datetime(df_stamp['time'].values), freq=self.freq)
-            data_stamp = data_stamp.transpose(1, 0) 
+        # df_stamp = df_raw[['time']][border1:border2]
+        # df_stamp['time'] = pd.to_datetime(df_stamp.time)
+        # if self.timeenc == 0:
+        #     df_stamp['month'] = df_stamp.time.apply(lambda row: row.month, 1)
+        #     df_stamp['day'] = df_stamp.time.apply(lambda row: row.day, 1)
+        #     df_stamp['weekday'] = df_stamp.time.apply(lambda row: row.weekday(), 1)
+        #     df_stamp['hour'] = df_stamp.time.apply(lambda row: row.hour, 1)
+        #     df_stamp['minute'] = df_stamp.time.apply(lambda row: row.minute, 1)
+        #     data_stamp = df_stamp.drop(['time'], 1).values
+        # elif self.timeenc == 1:
+        #     data_stamp = time_features(pd.to_datetime(df_stamp['time'].values), freq=self.freq)
+        #     data_stamp = data_stamp.transpose(1, 0) 
 
 
 
@@ -428,7 +428,7 @@ class mDataset_btc_block(Dataset):
 
         # self.data_y = data[border1:border2][:,:1]
         # print(self.data_x.shape,self.data_y.shape)
-        self.data_stamp = data_stamp
+        self.data_stamp = self.data_x
 
     def __getitem__(self, index):
         # s_begin = index
@@ -492,11 +492,7 @@ class m4Dataset_btc_block(Dataset):
         df_raw = pd.read_csv(os.path.join(self.root_path,
                                           self.data_path))
         
-        # border1s = [0,            12 * 30 * 24 - self.seq_len,     12 * 30 * 24 + 4 * 30 * 24 - self.seq_len]
-        # border2s = [12 * 30 * 24, 12 * 30 * 24 + 4 * 30 * 24,      12 * 30 * 24 + 8 * 30 * 24]
-        # border1 = border1s[self.set_type]
-        # border2 = border2s[self.set_type]
-        # print("Triggered!!!!!")
+
        
         dataset_len = len(df_raw)
         border1s = [0,                       int(dataset_len*0.8*0.8), int(dataset_len*0.8)]
@@ -569,8 +565,6 @@ class m4Dataset_btc_block(Dataset):
 
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
-
-
 
 
 class mDataset_btc_CGNN(Dataset):
@@ -1203,5 +1197,147 @@ class mDataset_test(Dataset):
     def __len__(self):
         # return len(self.data_x) - self.seq_len - self.label_len + 1
         return len(self.data_x)//self.seq_len
+    def inverse_transform(self, data):
+        return self.scaler.inverse_transform(data)
+
+
+class mDataset_btc_GNN(Dataset):
+    def __init__(self, args=[], root_path="dataset/btc", flag='train', size=None,
+                 features='MS', data_path='btc_t_v_withf.csv',
+                 target='range5', scale=True, timeenc=0, freq='t', seasonal_patterns=None):
+        # size [seq_len, label_len, pred_len]
+        # print("Yes right dataset is loaded")
+        self.args = args
+        # info
+        if size == None:
+            self.seq_len = 24 * 4 * 4
+            self.label_len = 24 * 4
+            self.pred_len = 0
+        else:
+            self.seq_len = size[0]
+            self.label_len = size[1]
+            self.pred_len = size[2]
+        # init
+        # print(f"data: {data_path}, scale {scale}, seq_len {self.seq_len},  self.label_len {self.label_len}, self.pred_len {self.pred_len}")
+
+        assert flag in ['train', 'test', 'val']
+        type_map = {'train': 0, 'val': 1, 'test': 2}
+        self.set_type = type_map[flag]
+
+        self.features = features
+        self.target = target
+        self.scale = scale
+        self.timeenc = timeenc
+        self.freq = freq
+        self.cache_path = "dataset/graph/CGNN_edges"
+
+        self.root_path = root_path
+        self.data_path = data_path
+        self.__read_data__()
+        if self.args.GNN_type != 1 and flag=='train': # static and hybird all require a global graph
+            # print(f"shape of data_x {self.data_x.shape}")
+            self.edge_index, self.edge_attr = mDataset_btc_GNN.create_graph(self.data_x[:self.seq_len,:])
+
+    def __read_data__(self):
+        self.scaler = StandardScaler()
+        df_raw = pd.read_csv(os.path.join(self.root_path,
+                                          self.data_path))
+       
+        dataset_len = len(df_raw)
+        border1s = [0,                       int(dataset_len*0.8), int(dataset_len*0.9)]
+        border2s = [int(dataset_len*0.8),int(dataset_len*0.9),     int(dataset_len)]        
+        # border1s = [0,                       int(dataset_len*0.8*0.75), int(dataset_len*0.75)]
+        # border2s = [int(dataset_len*0.8*0.75),int(dataset_len*0.75),     int(dataset_len)]
+        border1 = border1s[self.set_type]
+        border2 = border2s[self.set_type]
+
+        if self.features == 'M' or self.features == 'MS':
+            cols_data = df_raw.columns[2:]
+            # print(cols_data)
+            df_data = df_raw[cols_data]
+
+
+        elif self.features == 'S':
+            df_data = df_raw[[self.target]]
+
+        if self.scale:
+            train_data = df_data[border1s[0]:border2s[0]]
+            self.scaler.fit(train_data.values)
+            data = self.scaler.transform(df_data.values)
+        else:
+            data = df_data.values
+
+        # df_stamp = df_raw[['time']][border1:border2]
+        # df_stamp['time'] = pd.to_datetime(df_stamp.time)
+        # if self.timeenc == 0:
+        #     df_stamp['month'] = df_stamp.time.apply(lambda row: row.month, 1)
+        #     df_stamp['day'] = df_stamp.time.apply(lambda row: row.day, 1)
+        #     df_stamp['weekday'] = df_stamp.time.apply(lambda row: row.weekday(), 1)
+        #     df_stamp['hour'] = df_stamp.time.apply(lambda row: row.hour, 1)
+        #     df_stamp['minute'] = df_stamp.time.apply(lambda row: row.minute, 1)
+        #     data_stamp = df_stamp.drop(['time'], 1).values
+        # elif self.timeenc == 1:
+        #     data_stamp = time_features(pd.to_datetime(df_stamp['time'].values), freq=self.freq)
+        #     data_stamp = data_stamp.transpose(1, 0) 
+
+
+
+
+        self.data_x = data[border1:border2][:,1:]
+
+        self.data_y = data[border1:border2][:,:1]
+
+
+        # self.data_x = data[border1:border2]
+
+        # self.data_y = data[border1:border2][:,:1]
+        # print(self.data_x.shape,self.data_y.shape)
+        self.data_stamp = self.data_x 
+
+    @staticmethod
+    def create_graph(input, threshold=0.5):
+
+        print(f"shape of input {input.shape}")
+        if len(input.shape) == 2:
+            num_nodes, num_features = input.shape
+
+        elif len(input.shape) == 3:
+            batch_size, num_nodes, num_features = input.shape
+        
+        # Initialize edge lists
+        edge_index = []
+        edge_attr = []
+        
+        # Create edges based on the correlation matrix and temporal connections
+        for i in range(num_nodes):
+            if i < num_nodes - 1:
+                # Connect each node to its successor
+                edge_index.append([i, i + 1])
+                edge_attr.append(1.0)  # All edge weights set to 1
+            
+
+        edge_index = torch.tensor(edge_index, dtype=torch.long).t()
+        edge_attr = torch.tensor(edge_attr, dtype=torch.float)  # Ensure shape is (num_edges,)
+
+        return edge_index, edge_attr
+    
+    def __getitem__(self, index):
+        s_begin = index*self.seq_len
+        s_end = s_begin + self.seq_len
+        # r_begin = s_end - self.label_len
+        r_begin = s_end - 1
+        r_end = r_begin + self.label_len + self.pred_len
+
+        seq_x = self.data_x[s_begin:s_end]
+        seq_y = self.data_y[r_begin:r_end]
+        # seq_x_mark = self.data_stamp[s_begin:s_end]
+        # seq_y_mark = self.data_stamp[r_begin:r_end]
+
+
+        return seq_x, seq_y
+
+    def __len__(self):
+        return len(self.data_x)//self.seq_len
+
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)

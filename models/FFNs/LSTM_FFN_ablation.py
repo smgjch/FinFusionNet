@@ -245,7 +245,7 @@ class Model(nn.Module):
         # self.pool1d = nn.MaxPool1d(kernel_size=2)
         input_size = self.enc_in
         # input_size = 4139
-        LSTM_layers = 1
+        LSTM_layers = 6
         hidden_size = 128
 
         # self.projection1 = nn.Linear(input_size, input_size//2)
@@ -259,21 +259,21 @@ class Model(nn.Module):
 
         self.output_layer = nn.Linear(hidden_size, self.label_len)
 
-    # def patch_project(self, inputs, window_size=20, stride=1):
-    #     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    #     conved = torch.tensor([]).to(device)
-    #     n, x, y = inputs.shape
-    #     for i in range(0, x - window_size, stride):
-    #         slice_ = inputs[:, i:i + window_size, :]
-    #         # print(f"shape of current slice {slice_.shape}")
+    def patch_project(self, inputs, window_size=20, stride=1):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        conved = torch.tensor([]).to(device)
+        n, x, y = inputs.shape
+        for i in range(0, x - window_size, stride):
+            slice_ = inputs[:, i:i + window_size, :]
+            # print(f"shape of current slice {slice_.shape}")
 
-    #         sampled = self.t_sampling(slice_)
-    #         # print(f"shape of convoulted slice {sampled.shape}")
-    #         sampled = self.projection1(sampled)
-    #         # sampled = self.dropout_P(sampled)
+            # sampled = self.t_sampling(slice_)
+            # print(f"shape of convoulted slice {sampled.shape}")
+            sampled = self.projection1(slice_)
+            # sampled = self.dropout_P(sampled)
 
-    #         conved = torch.cat([conved,sampled],dim=1)
-    #     return conved
+            conved = torch.cat([conved,sampled],dim=1)
+        return conved
     
     # def t_sampling(self,inputs):
     #     flattened_input = inputs.view(self.batch_size, 1, -1)

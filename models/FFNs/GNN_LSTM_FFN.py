@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
+from torch_geometric.nn import GCNConv
+import torch.nn.functional as F
 
+# Set print options 
+torch.set_printoptions(threshold=100, edgeitems=5)
 
 class Model(nn.Module):
     def __init__(self, configs):
@@ -12,6 +16,15 @@ class Model(nn.Module):
         self.kernel_size = configs.kernel_size
         self.num_filters = configs.num_kernels
         self.enc_in = configs.enc_in
+        self.GNN_type = configs.GNN_type
+
+
+        self.h_conv1 = GCNConv(in_channels=self.enc_in, out_channels=self.enc_in*2)
+        self.h_conv2 = GCNConv(in_channels=self.enc_in*2, out_channels=self.enc_in*4) 
+        self.h_conv3 = GCNConv(in_channels=self.enc_in*4, out_channels=self.enc_in*8) 
+        self.h_conv4 = GCNConv(in_channels=self.enc_in*8, out_channels=self.enc_in*16) 
+        self.h_conv5 = GCNConv(in_channels=self.enc_in*16, out_channels=self.enc_in*32) 
+
 
         self.conv1_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
                                       kernel_size = self.kernel_size, dilation=1,padding ="same")
@@ -19,14 +32,10 @@ class Model(nn.Module):
 
         self.pool1d = nn.MaxPool1d(kernel_size=2)
 
-
-        # Set print options 
-        torch.set_printoptions(threshold=100, edgeitems=5)
-
-        input_size = 20*self.num_filters*self.enc_in//2
+        input_size = 20*self.num_filters*self.enc_in//2*32
         # input_size = 4139
         LSTM_layers = 1
-        hidden_size = 16
+        hidden_size = 128
 
         self.projection1 = nn.Linear(input_size, input_size//2)
         self.dropout_P = nn.Dropout(p=0.5)  # Dropout after first conv layer
@@ -36,13 +45,27 @@ class Model(nn.Module):
                             num_layers=LSTM_layers, 
                             batch_first=True,
                             dropout=0.5)        
-        # self.lstm = nn.RNN(input_size=input_size//2, 
-        #                     hidden_size=hidden_size, 
-        #                     num_layers=LSTM_layers, 
-        #                     batch_first=True,
-        #                     dropout=0.5)
+
 
         self.output_layer = nn.Linear(hidden_size, self.label_len)
+
+    def gnn_representation_learn(self, inputs, edge_index, edge_attr):
+        # inputs = inputs.permute(0,2,1)
+        # print(f"shape of inputs {inputs.shape}, edge index {edge_index.shape}, attr {edge_attr.shape}")
+        x = self.h_conv1(inputs, edge_index,edge_attr)
+        x = F.tanh(x)
+
+        x = self.h_conv2(x, edge_index, edge_attr)
+        x = F.tanh(x)    
+
+        x = self.h_conv3(x, edge_index, edge_attr)
+        x = F.tanh(x)        
+        
+        x = self.h_conv4(x, edge_index, edge_attr)
+        x = F.tanh(x)        
+        x = self.h_conv5(x, edge_index, edge_attr)
+        x = F.tanh(x)
+        return x
 
     def patch_conv(self, inputs, window_size=20, stride=1):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -70,9 +93,11 @@ class Model(nn.Module):
 
         return convoluted
     
-    def forward(self, inputs, _x, y, _y):
-        # print(f"input vshape {inputs.shape}")
-        convoluted = self.patch_conv(inputs)
+    def forward(self, inputs,edge_index, edge_attr):
+        gnn_learned = self.gnn_representation_learn(inputs,edge_index, edge_attr)
+        # print(f"shape of after gnn_learned {gnn_learned}")
+
+        convoluted = self.patch_conv(gnn_learned)
         # print(f"shape of before RNN {convoluted.shape}")
         # output = self.lstm(convoluted)[1]
         output = self.lstm(convoluted)[1][0]

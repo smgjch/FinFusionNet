@@ -20,7 +20,27 @@ from datetime import datetime
 
 warnings.filterwarnings('ignore')
 
+class CustomLoss(nn.Module):
+    def __init__(self, lambda_var=0.1):
+        super(CustomLoss, self).__init__()
+        self.mse_loss = nn.MSELoss()
+        self.lambda_var = lambda_var
 
+    def forward(self, predictions, targets):
+        # Calculate the MSE loss
+        mse = self.mse_loss(predictions, targets)
+        
+        # Calculate the standard deviation of the predictions
+        pred_std = torch.std(predictions, unbiased=False)
+        label_std = torch.std(targets, unbiased=False)
+        
+        # Calculate the variance penalty
+        var_penalty = (label_std - pred_std) ** 2
+        
+        # Combine MSE loss with variance regularization
+        loss = mse + self.lambda_var * var_penalty
+        # print(f"penalty {var_penalty}")
+        return loss
 
 class Exp_Long_Term_Forecast(Exp_Basic):
     def __init__(self, args):
@@ -53,8 +73,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
     def _select_criterion(self):
         criterion = nn.MSELoss()
+        # criterion = CustomLoss(lambda_var=1)
+        # print("CustomLoss activated!")
         return criterion
-    
+
     # def _select_criterion(self):
     #     # print(f"yes triggered")
     #     def IC_MSE(output, target):
@@ -80,13 +102,14 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
+        # print(f"len input shape {len(vali_data)}")
         preds = torch.tensor([])
         labels = torch.tensor([])
 
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
-                # print(f"VAL Get from data loader, batch_x: \n{batch_x.shape} \n\n batch_y{batch_y.shape}")
+                # print(f"VAL Get from data loader \n batch_y{batch_y.shape}")
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float()
 
@@ -116,15 +139,16 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     print(f"in val output shape after slice {outputs.shape}")
                     print(f"in val batch_y shape after slice {batch_y.shape}")
 
-                # print(f"------- Label sliced ------- \n{batch_x} ")
+                # print(f"------- Label sliced ------- \n{batch_y.shape} ")
 
                 pred = outputs.detach().cpu()
                 true = batch_y.detach().cpu()
                 # print(f"-------pred-----\n{pred.shape},{pred}")
                 # print(f"-------true-----\n{true.shape}, {true}")
 
-                preds = torch.cat((preds, pred.reshape(-1)[:-1]), dim=0)
-                labels = torch.cat((labels, true.reshape(-1)[:-1]), dim=0)
+                preds = torch.cat((preds, pred.reshape(-1)), dim=0)
+                labels = torch.cat((labels, true.reshape(-1)), dim=0)
+                # print(f"------- Label cated ------- \n{labels.shape} ")
 
                 mse_loss = nn.functional.mse_loss(pred, true)
 
@@ -139,8 +163,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         print(f"-----------prediction------- \n{preds}\n")
 
         print(f"-----------Lables------- \n{labels}\n")
-        print(f"mean of prediction {preds.mean()}, std of prediction {preds.std()}")
-        print(f"mean of labels {labels.mean()}, std of labels {labels.std()}")
+        print(f"mean of prediction {preds.mean()}, std of prediction {preds.std()}, len {len(preds)}")
+        print(f"mean of labels {labels.mean()}, std of labels {labels.std()}, len {len(labels)}")
 
         
         self.model.train()

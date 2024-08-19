@@ -77,24 +77,13 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
 
                 pred = outputs.detach().cpu()
                 true = batch_y.detach().cpu()
-                # if np.isnan(pred).any():
-                #     print(f"Get from data loader, batch_x: \n{batch_x} \n\n batch_y{batch_y}\n\n")
-                #     print(f"edge_index {edge_index} \nedge_attr {edge_attr}")
-                #     print(f"detected nan in pred {pred}")
-                # else:
-                #     print(f"你过关！！！")
+
 
                 preds = torch.cat((preds, pred.reshape(-1)[:-1]), dim=0)
                 labels = torch.cat((labels, true.reshape(-1)[:-1]), dim=0)
                 # print(f"pre {pred.reshape(-1)[:-1]}\nlabel {true.reshape(-1)[:-1]}")
 
                 loss = criterion(pred, true)
-                # ic = calculate_ic(pred, true)
-
-                # ic = np.corrcoef(pred.reshape(-1),true.reshape(-1))
-
-                #     print(f"np ic {ic} \n\n -------pred---------\n {pred} \n\n --------------true-------------\n {true}")
-                #     calculate_ic(pred, true)
 
                 total_loss.append(loss.item())
                 # total_ic.append(ic[0][1])
@@ -107,9 +96,9 @@ class Exp_Long_Term_Forecast_CGNN(Exp_Long_Term_Forecast):
         # print(f" {ic[0][1]} \n ---------------- IC ----------------- \n {ic} \n ------------MSE-------------\n{MSE}")
         print(f" {ic[0][1]}\n")
         print(f"-----------prediction------- \n{preds}\n")
-        print(f"mean of prediction {preds.mean()}, std of prediction {preds.std()}")
 
         print(f"-----------Lables------- \n{labels}\n")
+        print(f"mean of prediction {preds.mean()}, std of prediction {preds.std()}")
         print(f"mean of labels {labels.mean()}, std of labels {labels.std()}")
 
         

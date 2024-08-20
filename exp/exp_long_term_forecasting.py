@@ -109,7 +109,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
-                # print(f"VAL Get from data loader \n batch_y{batch_y.shape}")
+                if self.model.verbose:
+                    print(f"in val input get from loader x {batch_x}")
+                    print(f"in val input get from loader y {batch_y}")
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float()
 
@@ -128,16 +130,19 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs =  self.model(batch_x, 0, 0, 0)[0]
                     else:
                         outputs =  self.model(batch_x, 0, 0, 0)
+
+                if self.model.verbose:
+                    print(f"in val model output {outputs}")
+
                 f_dim = -1 if self.args.features == 'MS' else 0 #deprecate since label located at the thrid column
                 # f_dim = -1 if self.args.features == 'MS' or self.args.features == 'M' else 0
-                if self.model.verbose:
-                    print(f"in val output shape {outputs.shape}")
+
 
                 outputs = outputs[:, -self.args.label_len:, 0:1]
                 batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device)
                 if self.model.verbose:
-                    print(f"in val output shape after slice {outputs.shape}")
-                    print(f"in val batch_y shape after slice {batch_y.shape}")
+                    print(f"in val output shape after slice {outputs}")
+                    print(f"in val batch_y shape after slice {batch_y}")
 
                 # print(f"------- Label sliced ------- \n{batch_y.shape} ")
 
@@ -149,6 +154,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 preds = torch.cat((preds, pred.reshape(-1)), dim=0)
                 labels = torch.cat((labels, true.reshape(-1)), dim=0)
                 # print(f"------- Label cated ------- \n{labels.shape} ")
+                if self.model.verbose:
+                    print(f"in val preds after cat {preds}")
+                    print(f"in val labels after cat {labels}")
 
                 mse_loss = nn.functional.mse_loss(pred, true)
 
@@ -206,8 +214,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             self.model.train()
             epoch_time = time.time()
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(train_loader):
-                # print(f"Train Get from data loader, batch_x: \n{batch_x.shape} \n\n batch_y{batch_y.shape}")
-                # print(f"get from loader {batch_x.shape}")
+                if self.model.verbose:
+                    print(f"Train set got from data loader, batch_x: \n{batch_x}\nbatch_y {batch_y}")
                 self.loger.global_step += 1
                 
                 iter_count += 1
@@ -224,11 +232,16 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                             outputs =  self.model(batch_x, 0, 0, 0)[0] # not entered does not matter
                         else:
                             outputs =  self.model(batch_x, 0, 0, 0)
-                            # print(f"tain output shape {outputs.shape}")
+                        
+                        if self.model.verbose:
+                            print(f"exp output of model {outputs}")
                         # f_dim = -1 if self.args.features == 'MS' else 0
                         outputs = outputs[:, -self.args.label_len:, 0:1]
                         batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device) # only for btc dataset since target is at first column
-                        # print(f"indeed here")
+                        
+                        if self.model.verbose:
+                            print(f"exp output after slice {outputs}")
+                            print(f"exp label after slice {batch_y}")
 
                         loss = criterion(outputs, batch_y)
                         mse_loss = nn.functional.mse_loss(outputs, batch_y)
@@ -243,26 +256,22 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                         outputs =  self.model(batch_x, 0, 0, 0)
                     
                     if self.model.verbose:
-                        print(f"in train, ouput shape before slice {outputs.shape}")
-                    
+                        # print(f"in train, ouput shape before slice {outputs.shape}")
+                        print(f"exp output of model {outputs}")
+
                     f_dim = -1 if self.args.features == 'MS' else 0 # deprecate on btc dataset
 
 
                     outputs = outputs[:, -self.args.label_len:, 0:1]
                     
 
-                    if self.model.verbose:    
-                        print(f"in train, ouput after slice {outputs.shape}")
-
+               
                     batch_y = batch_y[:, -self.args.label_len:, 0:1].to(self.device) 
-                    # batch_y slice label only
 
-
-                    
-                    
                     if self.model.verbose:
-                        print(f"in train, batch_y shape after slice {batch_y.shape}")
-                    
+                        print(f"exp output after slice {outputs}")
+                        print(f"exp label after slice {batch_y}") 
+                              
                     loss = criterion(outputs, batch_y)
                     mse_loss = nn.functional.mse_loss(outputs, batch_y)
 

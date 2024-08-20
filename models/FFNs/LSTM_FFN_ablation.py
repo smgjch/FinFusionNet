@@ -236,21 +236,11 @@ class Model(nn.Module):
         self.num_filters = configs.num_kernels
         self.enc_in = configs.enc_in
 
-        # self.conv1_layers = nn.Conv1d(in_channels = 1, out_channels = self.num_filters, 
-        #                               kernel_size = self.kernel_size, dilation=1,padding ="same")
-        # self.dropout_conv1 = nn.Dropout(p=0.5)  # Dropout after first conv layer
-        # Set print options 
         torch.set_printoptions(threshold=100, edgeitems=5)
 
-        # self.pool1d = nn.MaxPool1d(kernel_size=2)
         input_size = self.enc_in
-        # input_size = 4139
         LSTM_layers = 6
         hidden_size = 128
-
-        # self.projection1 = nn.Linear(input_size, input_size//2)
-        # self.dropout_P = nn.Dropout(p=0.5)  # Dropout after first conv layer
-
         self.lstm = nn.LSTM(input_size=input_size, 
                             hidden_size=hidden_size, 
                             num_layers=LSTM_layers, 
@@ -285,14 +275,16 @@ class Model(nn.Module):
     #     return flattened_input
     
     def forward(self, inputs, _x, y, _y):
-        # projected = self.patch_project(inputs)
-        # print(f"shape of before lstm {convoluted.shape}")
+        print(f"input of forward {inputs}")
         output = self.lstm(inputs)[1][0]
+        print(f"output of lstm shape {output.shape}")
+
+        print(f"output of lstm {output}")
 
         output = output.permute(1,0,2)[:,-1:,:]
-        # print(f"shape of lstm {output.shape}")
+        print(f"output after slice {output}")
 
         output = self.output_layer(output)
-        # print(f"shape of output {output.shape}")
+        print(f"output after projection {output}")
 
         return output

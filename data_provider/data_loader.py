@@ -333,7 +333,7 @@ class Dataset_btc(Dataset):
 class mDataset_btc_block(Dataset):
     def __init__(self, args=[], root_path="dataset/btc", flag='train', size=None,
                  features='MS', data_path='btc_t_v_withf.csv',
-                 target='range5', scale=True, timeenc=0, freq='t', seasonal_patterns=None):
+                 target='range5', scale=False, timeenc=0, freq='t', seasonal_patterns=None):
         # size [seq_len, label_len, pred_len]
         # print("Yes right dataset is loaded")
         self.args = args

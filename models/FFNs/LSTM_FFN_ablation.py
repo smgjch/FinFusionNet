@@ -287,4 +287,19 @@ class Model(nn.Module):
         output = self.output_layer(output)
         print(f"output after projection {output}")
 
+        return output    
+    
+    def forward(self, inputs, _x, y, _y):
+        print(f"input of forward {inputs}")
+        output = self.lstm(inputs)[1][0]
+        print(f"output of lstm shape {output.shape}")
+
+        print(f"output of lstm {output}")
+
+        output = output.permute(1,0,2)[:,-1:,:]
+        print(f"output after slice {output}")
+
+        output = self.output_layer(output)
+        print(f"output after projection {output}")
+
         return output
